@@ -109,6 +109,145 @@
     </div>
 </section>
 
+<!-- AVALIAÇÕES -->
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-3">Avaliações do Sênior Conecta</h2>
+        <p class="text-muted mb-5">
+            Veja o que familiares e cuidadores estão dizendo.
+        </p>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-warning fs-4 mb-2">
+                            ★★★★★
+                        </div>
+                        <h5 class="fw-bold">Excelente segurança</h5>
+                        <p class="text-muted">
+                            Me sinto muito mais tranquila sabendo que recebo alertas em tempo real.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-warning fs-4 mb-2">
+                            ★★★★★
+                        </div>
+                        <h5 class="fw-bold">Interface simples</h5>
+                        <p class="text-muted">
+                            Minha mãe conseguiu usar sem dificuldades. Muito intuitivo.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-warning fs-4 mb-2">
+                            ★★★★☆
+                        </div>
+                        <h5 class="fw-bold">Ótimo monitoramento</h5>
+                        <p class="text-muted">
+                            O sistema de alerta de quedas é rápido e eficiente.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- DEPOIMENTOS -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-5">Depoimentos</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="fst-italic text-muted">
+                            "Depois que comecei a usar o Sênior Conecta, tenho muito mais tranquilidade
+                            no meu dia a dia. Sei que meu pai está seguro."
+                        </p>
+                        <p class="fw-bold mb-0">
+                            — Maria Souza, Filha e Cuidadora
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="fst-italic text-muted">
+                            "A detecção de quedas realmente funciona. Já recebemos um alerta importante."
+                        </p>
+                        <p class="fw-bold mb-0">
+                            — Carlos Mendes, Tutor
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- FORMULÁRIO DE COMENTÁRIO -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-4">Deixe seu comentário</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <form method="POST" action="#">
+                            @csrf
+
+                            <div class="mb-3">
+                                <label class="form-label">Nome</label>
+                                <input type="text" class="form-control">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Avaliação</label>
+                                <select class="form-select">
+                                    <option>★★★★★</option>
+                                    <option>★★★★☆</option>
+                                    <option>★★★☆☆</option>
+                                    <option>★★☆☆☆</option>
+                                    <option>★☆☆☆☆</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Comentário</label>
+                                <textarea class="form-control" rows="4"></textarea>
+                            </div>
+
+                            <button class="btn btn-primary w-100">
+                                Enviar Comentário
+                            </button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- COMO FUNCIONA -->
 <section id="como-funciona" class="py-5">
     <div class="container">
