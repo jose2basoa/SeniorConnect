@@ -24,10 +24,10 @@
                         <div class="mb-3">
                             <label class="form-label">E-mail</label>
                             <input type="email"
-                                   name="email"
-                                   value="{{ old('email') }}"
-                                   class="form-control @error('email') is-invalid @enderror"
-                                   required autofocus>
+                                name="email"
+                                value="{{ old('email') }}"
+                                class="form-control @error('email') is-invalid @enderror"
+                                required autofocus>
 
                             @error('email')
                                 <div class="invalid-feedback">
@@ -40,15 +40,21 @@
                         <div class="mb-3">
                             <label class="form-label">Senha</label>
                             <input type="password"
-                                   name="password"
-                                   class="form-control @error('password') is-invalid @enderror"
-                                   required>
+                                name="password"
+                                class="form-control @error('password') is-invalid @enderror"
+                                required>
 
                             @error('password')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
                             @enderror
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a href="{{ route('password.request') }}">
+                                Esqueci minha senha
+                            </a>
                         </div>
 
                         <!-- Remember -->
@@ -65,7 +71,10 @@
                             </button>
                         </div>
 
-                        <div class="text-center mt-3">
+                        <div class="text-center mt-3 d-flex justify-content-between">
+                            <a href="{{ route('public.index') }}">
+                                Voltar a tela inicial
+                            </a>
                             <a href="{{ route('register') }}">
                                 Criar conta
                             </a>

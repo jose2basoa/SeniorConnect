@@ -54,6 +54,7 @@ class User extends Authenticatable
 
     public function idosos()
     {
-        return $this->hasMany(\App\Models\Idoso::class);
+        return $this->belongsToMany(Idoso::class)
+                    ->withTimestamps();
     }
 }

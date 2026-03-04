@@ -2,24 +2,46 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Idoso;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 🔐 Admin fixo
+        User::updateOrCreate(
+            ['email' => 'jose.de.barros0192@gmail.com'],
+            [
+                'name' => 'Administrador Basoa',
+                'cpf' => '59940754850',
+                'password' => Hash::make('Js@Bs52a'),
+                'is_admin' => true,
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $tutor = User::updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'cpf' => '00000000000',
+                'password' => Hash::make('12345678'),
+                'is_admin' => false,
+            ]
+        );
+
+        $idoso = Idoso::create([
+            'nome' => 'João da Silva',
+            'data_nascimento' => '1950-05-10',
+            'sexo' => 'Masculino',
+            'cpf' => '11122233344',
+            'telefone' => '18999999999',
+            'observacoes' => 'Paciente com acompanhamento mensal.',
         ]);
+
+        // 🔗 VINCULA
+        $tutor->idosos()->attach($idoso->id);
     }
 }

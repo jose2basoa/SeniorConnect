@@ -33,8 +33,9 @@ class Idoso extends Model
         return $this->hasMany(ContatoEmergencia::class);
     }
 
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsToMany(User::class)
+                    ->withTimestamps();
     }
 }

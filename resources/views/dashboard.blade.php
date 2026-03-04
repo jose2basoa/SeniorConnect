@@ -30,7 +30,7 @@
 
             <div class="mt-3">
                 <a href="{{ route('idosos.create.step1') }}" class="btn btn-primary">
-                     Cadastrar Idoso
+                    Cadastrar Idoso
                 </a>
             </div>
         </div>
@@ -49,8 +49,8 @@
                 </h5>
                 <small>
                     Última atividade:
-                    {{ $idoso->ultima_atividade 
-                        ? \Carbon\Carbon::parse($idoso->ultima_atividade)->format('H:i') 
+                    {{ $idoso->ultima_atividade
+                        ? \Carbon\Carbon::parse($idoso->ultima_atividade)->format('H:i')
                         : 'Sem registro' }}
                 </small>
             </div>
@@ -72,8 +72,8 @@
                     {{ $ultimaLocalizacao->endereco ?? 'Sem localização' }}
                 </h6>
                 <small>
-                    {{ $ultimaLocalizacao 
-                        ? $ultimaLocalizacao->created_at->format('H:i') 
+                    {{ $ultimaLocalizacao
+                        ? $ultimaLocalizacao->created_at->format('H:i')
                         : '' }}
                 </small>
             </div>
@@ -137,11 +137,11 @@
             @else
                 <ul class="list-group list-group-flush">
                     @foreach($ultimosEventos as $evento)
-                        <li class="list-group-item 
+                        <li class="list-group-item
                             {{ $evento->gravidade == 'alta' ? 'text-danger' : '' }}">
-                            
-                            {{ ucfirst($evento->tipo) }} - 
-                            {{ $evento->descricao }} 
+
+                            {{ ucfirst($evento->tipo) }} -
+                            {{ $evento->descricao }}
                             <small class="text-muted">
                                 ({{ $evento->created_at->format('H:i') }})
                             </small>
