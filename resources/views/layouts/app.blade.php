@@ -10,6 +10,7 @@
 
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -17,6 +18,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ auth()->check() ? route('dashboard') : url('/') }}">
+                <i class="bi bi-shield-check"></i>
                 Sênior Conecta
             </a>
 
@@ -26,17 +28,11 @@
 
                         {{-- Links Admin --}}
                         @if(auth()->user()->is_admin)
-                            <a href="{{ route('admin.dashboard') }}" class="btn btn-light btn-sm">
-                                Painel Admin
-                            </a>
 
-                            <a href="{{ route('admin.users') }}" class="btn btn-outline-light btn-sm">
-                                Usuários
-                            </a>
+                        <a href="{{ route('admin.dashboard') }}" class="btn btn-light btn-sm">
+                            Painel Admin
+                        </a>
 
-                            <a href="{{ route('admin.idosos') }}" class="btn btn-outline-light btn-sm">
-                                Idosos
-                            </a>
                         @endif
 
                         <span class="text-white">
