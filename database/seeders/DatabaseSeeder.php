@@ -11,37 +11,41 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 🔐 Admin fixo
-        User::updateOrCreate(
-            ['email' => 'jose.de.barros0192@gmail.com'],
+        // 🔐 ADMIN DO SISTEMA
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@seniorconecta.com'],
             [
                 'name' => 'Administrador Basoa',
-                'cpf' => '59940754850',
+                'cpf' => '123.456.789-09',
                 'password' => Hash::make('Js@Bs52a'),
                 'is_admin' => true,
             ]
         );
 
+        // 👤 TUTOR DE TESTE
         $tutor = User::updateOrCreate(
-            ['email' => 'test@example.com'],
+            ['email' => 'tutor@seniorconecta.com'],
             [
-                'name' => 'Test User',
-                'cpf' => '00000000000',
+                'name' => 'Paulo Palhuzi Júnior',
+                'cpf' => '987.654.321-00',
                 'password' => Hash::make('12345678'),
                 'is_admin' => false,
             ]
         );
 
-        $idoso = Idoso::create([
-            'nome' => 'João da Silva',
-            'data_nascimento' => '1950-05-10',
-            'sexo' => 'Masculino',
-            'cpf' => '11122233344',
-            'telefone' => '18999999999',
-            'observacoes' => 'Paciente com acompanhamento mensal.',
-        ]);
+        // 👴 IDOSO DE TESTE
+        $idoso = Idoso::updateOrCreate(
+            ['cpf' => '111.444.777-35'],
+            [
+                'nome' => 'Paulo Palhuzi',
+                'data_nascimento' => '1950-05-10',
+                'sexo' => 'Masculino',
+                'telefone' => '(18)99999-9999',
+                'observacoes' => 'Cadastro gerado automaticamente para testes.',
+            ]
+        );
 
-        // 🔗 VINCULA
-        $tutor->idosos()->attach($idoso->id);
+        // 🔗 VINCULA IDOSO AO TUTOR
+        $tutor->idosos()->syncWithoutDetaching([$idoso->id]);
     }
 }

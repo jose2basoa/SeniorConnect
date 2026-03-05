@@ -210,12 +210,25 @@
 <!-- CTA FINAL -->
 <section class="bg-primary text-white text-center py-5">
     <div class="container">
-        <h3 class="fw-bold mb-3">
-            Mais segurança, mais tranquilidade, mais cuidado.
-        </h3>
-        <a href="{{ route('register') }}" class="btn btn-light btn-lg">
-            Criar Conta Gratuitamente
-        </a>
+
+        @auth
+            <h3 class="fw-bold mb-3">
+                Bem-vindo de volta! Acompanhe tudo pelo seu painel.
+            </h3>
+
+            <a href="{{ route('dashboard') }}" class="btn btn-light btn-lg">
+                Acessar meu painel
+            </a>
+        @else
+            <h3 class="fw-bold mb-3">
+                Mais segurança, mais tranquilidade, mais cuidado.
+            </h3>
+
+            <a href="{{ route('register') }}" class="btn btn-light btn-lg">
+                Criar conta gratuitamente
+            </a>
+        @endauth
+
     </div>
 </section>
 
