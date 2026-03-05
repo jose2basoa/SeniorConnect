@@ -16,8 +16,9 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/dashboard">Sênior Conecta</a>
-
+            <a class="navbar-brand fw-bold" href="{{ auth()->check() ? route('dashboard') : url('/') }}">
+                Sênior Conecta
+            </a>
 
             <div class="collapse navbar-collapse justify-content-end">
                 @auth

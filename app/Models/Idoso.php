@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Idoso extends Model
 {
     protected $fillable = [
-        'user_id',
         'nome',
         'data_nascimento',
         'sexo',
@@ -23,7 +22,7 @@ class Idoso extends Model
         return $this->hasOne(Endereco::class);
     }
 
-    public function dadosClinicos()
+    public function dadosClinico()
     {
         return $this->hasOne(DadosClinico::class);
     }
@@ -35,7 +34,6 @@ class Idoso extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)
-                    ->withTimestamps();
+        return $this->belongsToMany(User::class, 'idoso_user')->withTimestamps();
     }
 }

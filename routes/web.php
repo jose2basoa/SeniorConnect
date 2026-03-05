@@ -55,6 +55,21 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('idosos')->group(function () {
 
+        Route::get('/cadastrar', [IdosoController::class, 'escolherCadastro'])
+            ->name('idosos.cadastrar');
+
+        Route::get('/idosos/vincular', [IdosoController::class, 'vincularForm'])
+            ->name('idosos.vincular');
+
+        Route::post('/idosos/vincular', [IdosoController::class, 'vincular'])
+            ->name('idosos.vincular.buscar');
+
+        Route::get('/gerenciar', [IdosoController::class, 'gerenciar'])
+            ->name('idosos.gerenciar');
+
+        Route::delete('/{idoso}/desvincular', [IdosoController::class, 'desvincular'])
+            ->name('idosos.desvincular');
+
         Route::get('/create/step1', [IdosoController::class, 'createStep1'])
             ->name('idosos.create.step1');
 
@@ -79,9 +94,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/{idoso}/create/step4', [IdosoController::class, 'storeStep4'])
             ->name('idosos.store.step4');
 
-        Route::delete('/{idoso}/contato/{contato}',
-            [IdosoController::class, 'removerContato']
-        )->name('idosos.contato.remover');
+        Route::delete('/{idoso}/contato/{contato}', [IdosoController::class, 'removerContato'])
+            ->name('idosos.contato.remover');
+
     });
 
 });

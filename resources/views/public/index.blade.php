@@ -3,53 +3,83 @@
 @section('content')
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow fixed-top">
     <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="/dashboard">
-            Sênior Conecta
-        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <ul class="navbar-nav align-items-center">
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
 
+            <a class="navbar-brand fw-bold" href="{{ auth()->check() ? route('dashboard') : url('/') }}">
+                Sênior Conecta
+            </a>
+
+            <!-- LINKS LANDING PAGE -->
+            <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="#funcionalidades">Funcionalidades</a>
+                    <a class="nav-link text-white" href="#funcionalidades">Funcionalidades</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#tecnologia">Tecnologia</a>
+                    <a class="nav-link text-white" href="#tecnologia">Tecnologia</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#como-funciona">Como Funciona</a>
+                    <a class="nav-link text-white" href="#como-funciona">Como Funciona</a>
                 </li>
+            </ul>
+
+            <!-- AREA USUÁRIO -->
+            <div class="d-flex align-items-center gap-3">
 
                 @auth
-                    <li class="nav-item ms-3">
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-success">
-                            Dashboard
+
+                    {{-- Links Admin --}}
+                    @if(auth()->user()->is_admin)
+                        <a href="{{ route('admin.dashboard') }}" class="btn btn-light btn-sm">
+                            Painel Admin
                         </a>
-                    </li>
+
+                        <a href="{{ route('admin.users') }}" class="btn btn-outline-light btn-sm">
+                            Usuários
+                        </a>
+
+                        <a href="{{ route('admin.idosos') }}" class="btn btn-outline-light btn-sm">
+                            Idosos
+                        </a>
+                    @endif
+
+                    <span class="text-white">
+                        {{ auth()->user()->name }}
+                    </span>
+
+                    <a href="{{ route('profile.edit') }}" class="btn btn-light btn-sm">
+                        <i class="bi bi-person-circle"></i>
+                    </a>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="btn btn-light btn-sm">
+                            Sair
+                        </button>
+                    </form>
+
                 @endauth
 
                 @guest
-                    <li class="nav-item ms-3">
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary">
-                            Login
-                        </a>
-                    </li>
-                    <li class="nav-item ms-2">
-                        <a href="{{ route('register') }}" class="btn btn-primary">
-                            Criar Conta
-                        </a>
-                    </li>
+                    <a href="{{ route('login') }}" class="btn btn-light btn-sm">
+                        Login
+                    </a>
+
+                    <a href="{{ route('register') }}" class="btn btn-outline-light btn-sm">
+                        Criar Conta
+                    </a>
                 @endguest
 
-            </ul>
+            </div>
+
         </div>
     </div>
 </nav>
@@ -65,7 +95,7 @@
         <p class="lead text-muted mb-4">
             Plataforma integrada com aplicativo mobile, portal web e protocolos automatizados de emergência.
         </p>
-        <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-4 me-2">
+        <a href="{{ route('login') }}" class="btn btn-primary btn-lg px-4 me-2">
             Começar Agora
         </a>
         <a href="#funcionalidades" class="btn btn-outline-secondary btn-lg">

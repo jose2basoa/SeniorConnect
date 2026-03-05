@@ -45,13 +45,13 @@
     <div class="d-flex justify-content-between mt-4">
 
         <!-- Botão Voltar -->
-        <a href="{{ route('dashboard') }}" 
+        <a href="{{ route('idosos.cadastrar') }}"
         class="btn btn-outline-secondary px-4">
             ← Voltar
         </a>
 
         <!-- Botão Próximo -->
-        <button type="submit" 
+        <button type="submit"
                 class="btn btn-primary px-4">
             Próximo →
         </button>

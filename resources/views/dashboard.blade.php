@@ -13,10 +13,26 @@
             </small>
         </div>
 
-        <div>
-            <span class="badge bg-danger fs-6">
-                {{ $alertas }} Alertas Ativos
-            </span>
+        <div class="d-flex align-items-center gap-2">
+
+            @if($idoso)
+
+                <span class="badge bg-danger fs-6">
+                    {{ $alertas }} Alertas Ativos
+                </span>
+
+                <a href="{{ route('idosos.gerenciar') }}" class="btn btn-outline-primary btn-sm">
+                    Gerenciar Idoso
+                </a>
+
+            @else
+
+                <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary btn-sm">
+                    Cadastrar Idoso
+                </a>
+
+            @endif
+
         </div>
     </div>
 
@@ -27,12 +43,6 @@
             <p class="text-muted">
                 Para começar o monitoramento, cadastre um idoso.
             </p>
-
-            <div class="mt-3">
-                <a href="{{ route('idosos.create.step1') }}" class="btn btn-primary">
-                    Cadastrar Idoso
-                </a>
-            </div>
         </div>
 
     @else
