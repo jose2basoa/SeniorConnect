@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('idosos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
             $table->string('nome');
             $table->date('data_nascimento');
-            $table->string('sexo')->nullable();
-            $table->string('cpf')->nullable();
-            $table->string('telefone')->nullable();
+            $table->string('sexo');
+            $table->string('cpf')->unique();
+            $table->string('telefone');
             $table->text('observacoes')->nullable();
 
             $table->boolean('status_online')->default(false);
