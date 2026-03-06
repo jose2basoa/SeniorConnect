@@ -16,6 +16,7 @@
     <style>
         body {
             background-color: #f8fafc;
+            padding-top: 88px;
         }
 
         .navbar-brand {
@@ -37,6 +38,12 @@
         .form-control,
         .form-select {
             border-radius: .75rem;
+        }
+
+        @media (max-width: 991.98px) {
+            body {
+                padding-top: 76px;
+            }
         }
     </style>
 

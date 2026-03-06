@@ -1,20 +1,47 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top py-2">
     <div class="container">
 
         <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
-           href="{{ auth()->check() ? route('dashboard') : route('public.index') }}">
+           href="{{ request()->routeIs('dashboard') ? route('public.index') : (auth()->check() ? route('dashboard') : route('public.index')) }}">
             <i class="bi bi-shield-check"></i>
-            <span>Sênior Conecta</span>
+            Sênior Conecta
         </a>
 
-        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="mainNavbar">
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
 
-            @auth
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+            {{-- MENU CENTRAL --}}
+            <ul class="navbar-nav mx-auto">
+
+                {{-- LANDING PAGE --}}
+                @if(request()->routeIs('public.index'))
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#beneficios">Benefícios</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#funcionalidades">Funcionalidades</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#como-funciona">Como funciona</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#depoimentos">Relatos</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#faq">Dúvidas</a>
+                    </li>
+
+                {{-- SISTEMA --}}
+                @elseif(auth()->check())
+
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active fw-semibold' : '' }}"
                            href="{{ route('dashboard') }}">
@@ -30,41 +57,73 @@
                     </li>
 
                     @if(auth()->user()->is_admin)
+
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.*') ? 'active fw-semibold' : '' }}"
-                               href="{{ route('admin.dashboard') }}">
+                            href="{{ route('admin.dashboard') }}">
                                 Admin
                             </a>
                         </li>
+
                     @endif
-                </ul>
 
-                <div class="d-flex align-items-center gap-2 flex-column flex-lg-row mt-3 mt-lg-0">
-                    <span class="text-white-50 small d-none d-lg-inline">
-                        {{ auth()->user()->nome_completo ?? auth()->user()->name }}
-                    </span>
+                @endif
 
-                    <a href="{{ route('profile.edit') }}" class="btn btn-light btn-sm">
-                        <i class="bi bi-person-circle me-1"></i> Perfil
+            </ul>
+
+
+            {{-- BOTÕES DIREITA --}}
+            <div class="d-flex align-items-center gap-2">
+
+                @auth
+                    @if(auth()->user()->is_admin)
+                        <a href="{{ route('admin.comentarios.index') }}"
+                        class="btn btn-sm
+                        {{ request()->routeIs('admin.comentarios.*')
+                                ? 'btn-light text-primary fw-semibold'
+                                : 'btn-outline-light' }}">
+
+                            <i class="bi bi-chat-left-text me-1"></i> Comentários
+                        </a>
+                    @endif
+
+                    <a href="{{ route('dashboard') }}"
+                    class="btn btn-sm
+                    {{ request()->routeIs('dashboard')
+                            ? 'btn-light text-primary fw-semibold'
+                            : 'btn-outline-light' }}">
+
+                        <i class="bi bi-speedometer2 me-1"></i> Painel
+                    </a>
+
+                    <a href="{{ route('profile.edit') }}"
+                       class="btn btn-light btn-sm d-flex align-items-center gap-2">
+                        <i class="bi bi-person-circle"></i>
+                        <span class="d-none d-lg-inline">
+                            {{ auth()->user()->name }}
+                        </span>
                     </a>
 
                     <form method="POST" action="{{ route('logout') }}" class="m-0">
                         @csrf
-                        <button type="submit" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-box-arrow-right me-1"></i> Sair
+                        <button class="btn btn-light btn-sm">
+                            Sair
                         </button>
                     </form>
-                </div>
-            @else
-                <div class="ms-auto d-flex gap-2 mt-3 mt-lg-0">
+
+                @else
+
                     <a href="{{ route('login') }}" class="btn btn-light btn-sm">
                         Entrar
                     </a>
+
                     <a href="{{ route('register') }}" class="btn btn-outline-light btn-sm">
                         Criar conta
                     </a>
-                </div>
-            @endauth
+
+                @endauth
+
+            </div>
 
         </div>
     </div>

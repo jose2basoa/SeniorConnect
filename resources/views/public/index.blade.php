@@ -2,72 +2,6 @@
 
 @section('content')
 
-<style>
-    section { scroll-margin-top: 90px; }
-</style>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
-            href="{{ auth()->check() ? route('dashboard') : url('/') }}">
-            <i class="bi bi-shield-check"></i>
-            Sênior Conecta
-        </a>
-
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link text-white" href="#beneficios">Benefícios</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="#funcionalidades">Funcionalidades</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="#como-funciona">Como funciona</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="#depoimentos">Relatos</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="#faq">Dúvidas</a></li>
-            </ul>
-
-            <div class="d-flex align-items-center gap-2">
-
-                @auth
-                    @if(auth()->user()->is_admin)
-                        <a href="{{ route('admin.dashboard') }}" class="btn btn-light btn-sm">
-                            Painel Admin
-                        </a>
-                    @endif
-
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-sm">
-                        <i class="bi bi-speedometer2 me-1"></i> Painel
-                    </a>
-
-                    <a href="{{ route('profile.edit') }}" class="btn btn-light btn-sm d-flex align-items-center gap-2">
-                        <i class="bi bi-person-circle"></i>
-                        <span class="d-none d-lg-inline">{{ auth()->user()->name }}</span>
-                    </a>
-
-                    <form method="POST" action="{{ route('logout') }}" class="m-0">
-                        @csrf
-                        <button class="btn btn-light btn-sm">Sair</button>
-                    </form>
-                @endauth
-
-                @guest
-                    <a href="{{ route('login') }}" class="btn btn-light btn-sm">
-                        Entrar
-                    </a>
-                    <a href="{{ route('register') }}" class="btn btn-outline-light btn-sm">
-                        Criar conta
-                    </a>
-                @endguest
-
-            </div>
-        </div>
-    </div>
-</nav>
-
-<div style="margin-top:80px;"></div>
-
 <!-- HERO -->
 <section class="py-5 bg-light">
     <div class="container">
@@ -272,99 +206,203 @@
 <section id="depoimentos" class="bg-light py-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">Relatos de quem usa</h2>
+            <span class="badge bg-primary-subtle text-primary mb-3 px-3 py-2 rounded-pill">
+                Relatos e participação da comunidade
+            </span>
+
+            <h2 class="fw-bold">Comentários aprovados e espaço para contribuição</h2>
             <p class="text-muted col-md-8 mx-auto">
-                Uma experiência mais humana — com foco em tranquilidade para famílias e cuidadores.
+                Comentários enviados pelos usuários passam por validação antes de aparecer publicamente,
+                mantendo a área mais organizada, confiável e alinhada com a proposta do projeto.
             </p>
         </div>
 
-        <div class="row g-4">
-            @php
-                // dados mockados (depois você pode puxar do banco)
-                $depoimentos = [
-                    [
-                        'nome' => 'Mariana S.',
-                        'papel' => 'Filha / Tutora',
-                        'foto' => 'https://i.pravatar.cc/150?img=47',
-                        'texto' => 'O painel me ajudou a acompanhar a rotina com mais calma. O histórico de alertas facilita muito.'
-                    ],
-                    [
-                        'nome' => 'Carlos R.',
-                        'papel' => 'Cuidador',
-                        'foto' => 'https://i.pravatar.cc/150?img=12',
-                        'texto' => 'Antes eu anotava tudo no papel. Agora fica organizado e dá para consultar rapidinho.'
-                    ],
-                    [
-                        'nome' => 'Ana P.',
-                        'papel' => 'Familiar',
-                        'foto' => 'https://i.pravatar.cc/150?img=32',
-                        'texto' => 'A sensação é de mais segurança. Mesmo longe, eu sei quando algo foge do normal.'
-                    ],
-                ];
-            @endphp
+        @if(session('success'))
+            <div class="alert alert-success rounded-4 border-0 shadow-sm mb-4">
+                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            </div>
+        @endif
 
-            @foreach($depoimentos as $d)
-                <div class="col-md-4">
-                    <div class="card shadow border-0 h-100 rounded-4">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <img src="{{ $d['foto'] }}" alt="Foto de {{ $d['nome'] }}"
-                                    class="rounded-circle" width="52" height="52">
-                                <div class="text-start">
-                                    <div class="fw-bold">{{ $d['nome'] }}</div>
-                                    <small class="text-muted">{{ $d['papel'] }}</small>
+        @if($errors->any())
+            <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4">
+                <div class="fw-semibold mb-1">Não foi possível enviar seu comentário.</div>
+                <ul class="mb-0 ps-3">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-7">
+                <div class="row g-4">
+                    @forelse($comentarios as $comentario)
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 rounded-4 h-100">
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold"
+                                             style="width: 54px; height: 54px; font-size: 1.05rem;">
+                                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($comentario->nome_publico, 0, 1)) }}
+                                        </div>
+
+                                        <div>
+                                            <div class="fw-bold">{{ $comentario->nome_publico }}</div>
+                                            <small class="text-muted">
+                                                {{ $comentario->cargo ?: 'Usuário da plataforma' }}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-muted mb-4 flex-grow-1">
+                                        “{{ $comentario->comentario }}”
+                                    </p>
+
+                                    <div class="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
+                                        <small class="text-muted">
+                                            Publicado em
+                                            {{ optional($comentario->aprovado_em ?? $comentario->created_at)->format('d/m/Y') }}
+                                        </small>
+
+                                        <span class="badge rounded-pill text-bg-light border">
+                                            <i class="bi bi-patch-check text-primary me-1"></i> Validado
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-
-                            <p class="text-muted mb-0">
-                                “{{ $d['texto'] }}”
-                            </p>
                         </div>
-                    </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-body p-4 p-lg-5 text-center">
+                                    <div class="fs-1 text-primary mb-3">
+                                        <i class="bi bi-chat-square-quote"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Nenhum comentário público ainda</h5>
+                                    <p class="text-muted mb-0">
+                                        Os primeiros comentários aprovados aparecerão aqui assim que forem validados pela equipe.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforelse
                 </div>
-            @endforeach
-        </div>
+            </div>
 
-        <!-- FORM COMENTÁRIO -->
-        <div class="row justify-content-center mt-5">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold mb-3">Deixe um comentário</h5>
+            <div class="col-lg-5">
+                <div class="card border-0 shadow rounded-4 h-100">
+                    <div class="card-body p-4 p-lg-4">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="fs-3 text-primary">
+                                <i class="bi bi-pencil-square"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1">Deixe seu comentário</h5>
+                                <p class="text-muted mb-0">
+                                    Compartilhe sua percepção sobre o Sênior Conecta.
+                                </p>
+                            </div>
+                        </div>
 
-                        {{-- Depois você cria route('comentarios.store') e salva no banco --}}
-                        <form method="POST" action="#">
-                            @csrf
+                        @auth
+                            <form method="POST" action="{{ route('comentarios.store') }}">
+                                @csrf
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Seu nome</label>
-                                    <input type="text" name="nome" class="form-control" placeholder="Ex: João" required>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Nome público</label>
+                                    <input
+                                        type="text"
+                                        name="nome_publico"
+                                        class="form-control @error('nome_publico') is-invalid @enderror"
+                                        value="{{ old('nome_publico', auth()->user()->name) }}"
+                                        placeholder="Como seu nome aparecerá"
+                                        required
+                                    >
+                                    @error('nome_publico')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">E-mail (opcional)</label>
-                                    <input type="email" name="email" class="form-control" placeholder="nome@dominio.com">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Cargo ou relação com o projeto</label>
+                                    <input
+                                        type="text"
+                                        name="cargo"
+                                        class="form-control @error('cargo') is-invalid @enderror"
+                                        value="{{ old('cargo') }}"
+                                        placeholder="Ex: Familiar, tutor, cuidador"
+                                    >
+                                    @error('cargo')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
-                                <div class="col-12">
-                                    <label class="form-label">Comentário</label>
-                                    <textarea name="mensagem" class="form-control" rows="4"
-                                        placeholder="Conte como você imagina que o sistema pode ajudar..."
-                                        required></textarea>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Comentário</label>
+                                    <textarea
+                                        name="comentario"
+                                        rows="5"
+                                        class="form-control @error('comentario') is-invalid @enderror"
+                                        placeholder="Conte como a plataforma pode ajudar ou como foi sua experiência."
+                                        required
+                                    >{{ old('comentario') }}</textarea>
+                                    @error('comentario')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
-                                <div class="col-12 d-flex justify-content-end">
-                                    <button class="btn btn-primary">
-                                        Enviar comentário
+                                <div class="d-grid">
+                                    <button class="btn btn-primary btn-lg">
+                                        <i class="bi bi-send me-1"></i> Enviar comentário
                                     </button>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
 
-                        <small class="text-muted d-block mt-2">
-                            * Comentários podem aparecer publicamente após revisão.
-                        </small>
+                            <div class="small text-muted mt-3">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Seu comentário ficará como <strong>pendente</strong> até a revisão do administrador.
+                            </div>
+                        @else
+                            <div class="rounded-4 border bg-light p-4">
+                                <div class="fw-semibold mb-2">Entre para participar</div>
+                                <p class="text-muted mb-3">
+                                    Para enviar um comentário, é preciso estar logado na plataforma.
+                                </p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('login') }}" class="btn btn-primary">
+                                        Entrar
+                                    </a>
+                                    <a href="{{ route('register') }}" class="btn btn-outline-primary">
+                                        Criar conta
+                                    </a>
+                                </div>
+                            </div>
+                        @endauth
+
+                        <hr class="my-4">
+
+                        <div class="row g-3 text-center">
+                            <div class="col-4">
+                                <div class="border rounded-4 p-3 h-100 bg-light">
+                                    <div class="fw-bold fs-5">{{ $comentarios->count() }}</div>
+                                    <small class="text-muted">Visíveis agora</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded-4 p-3 h-100 bg-light">
+                                    <div class="fw-bold fs-5">100%</div>
+                                    <small class="text-muted">Moderados</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded-4 p-3 h-100 bg-light">
+                                    <div class="fw-bold fs-5">Público</div>
+                                    <small class="text-muted">Após aprovação</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

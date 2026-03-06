@@ -23,26 +23,25 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="{{ route('public.index') }}">
-                <i class="bi bi-shield-check"></i>
-                <span>Sênior Conecta</span>
+
+            <a class="navbar-brand fw-bold" href="{{ route('public.index') }}">
+                Sênior Conecta
             </a>
 
-            <div class="d-flex gap-2">
+            <div class="collapse navbar-collapse justify-content-end">
+
                 @auth
-                    <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm">
-                        Ir para o painel
+                    <a href="{{ route('dashboard') }}" class="btn btn-outline-primary btn-sm">
+                        Dashboard
                     </a>
                 @else
                     <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
                         Entrar
                     </a>
-                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm">
-                        Criar conta
-                    </a>
                 @endauth
+
             </div>
         </div>
     </nav>

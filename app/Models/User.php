@@ -53,4 +53,14 @@ class User extends Authenticatable
     {
         return trim(($this->name ?? '') . ' ' . ($this->sobrenome ?? ''));
     }
+
+    public function comentarios()
+    {
+        return $this->hasMany(\App\Models\Comentario::class);
+    }
+
+    public function comentariosAprovados()
+    {
+        return $this->hasMany(\App\Models\Comentario::class, 'aprovado_por');
+    }
 }

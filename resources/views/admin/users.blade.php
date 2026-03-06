@@ -8,7 +8,12 @@
             <h2 class="fw-bold mb-1">Usuários cadastrados</h2>
             <small class="text-muted">Gerencie administradores e tutores vinculados ao sistema.</small>
         </div>
-        <span class="badge bg-primary fs-6">Total: {{ $users->count() }}</span>
+        <div>
+            <span class="badge bg-primary fs-6">Total: {{ $users->count() }}</span>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Voltar ao painel
+            </a>
+        </div>
     </div>
 
     @if(session('success'))

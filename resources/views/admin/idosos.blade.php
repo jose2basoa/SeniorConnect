@@ -8,7 +8,12 @@
             <h2 class="fw-bold mb-1">Cadastros de pessoas acompanhadas</h2>
             <small class="text-muted">Gerencie vínculos, acompanhe tutores e organize os registros do sistema.</small>
         </div>
-        <span class="badge bg-primary fs-6">Total: {{ $idosos->count() }}</span>
+        <div>
+            <span class="badge bg-primary fs-6">Total: {{ $idosos->count() }}</span>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Voltar ao painel
+            </a>
+        </div>
     </div>
 
     @if(session('success'))

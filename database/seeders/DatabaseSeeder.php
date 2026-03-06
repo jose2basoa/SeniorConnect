@@ -11,12 +11,11 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ADMIN DO SISTEMA
         $admin = User::updateOrCreate(
             ['email' => 'admin@seniorconecta.com'],
             [
-                'name' => 'Administrador Basoa',
-                'sobrenome' => 'Sistema',
+                'name' => 'Administrador',
+                'sobrenome' => 'Basoa',
                 'cpf' => '12345678909',
                 'telefone' => '18999999999',
                 'data_nascimento' => '1995-01-15',
@@ -32,7 +31,6 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // TUTOR DE TESTE
         $tutor = User::updateOrCreate(
             ['email' => 'tutor@seniorconecta.com'],
             [
@@ -53,7 +51,6 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // IDOSO FIXO DE TESTE
         $idoso = Idoso::updateOrCreate(
             ['cpf' => '11144477735'],
             [
@@ -66,7 +63,6 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // vínculo fixo do tutor de teste
         $tutor->idosos()->syncWithoutDetaching([$idoso->id]);
 
         $this->call([
@@ -75,6 +71,7 @@ class DatabaseSeeder extends Seeder
             VinculosAleatoriosSeeder::class,
             MedicamentoSeeder::class,
             EventoSeeder::class,
+            ComentarioSeeder::class,
         ]);
     }
 }
