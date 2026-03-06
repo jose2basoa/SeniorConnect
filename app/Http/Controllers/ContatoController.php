@@ -6,22 +6,25 @@ use App\Models\Idoso;
 
 class ContatoController extends Controller
 {
+    private function buscarIdosoPermitido(int $idosoId): Idoso
+    {
+        $user = auth()->user();
+
+        $idoso = Idoso::with(['users', 'contatosEmergencia'])->findOrFail($idosoId);
+
+        $temPermissao = $user->is_admin || $idoso->users->contains('id', $user->id);
+
+        abort_unless($temPermissao, 403, 'Você não tem permissão para acessar esta pessoa.');
+
+        return $idoso;
+    }
+
     public function index(Idoso $idoso)
     {
-        // só permite se o idoso estiver vinculado ao usuário logado (pivot)
-        abort_unless(
-            auth()->user()->idosos()->where('idosos.id', $idoso->id)->exists(),
-            403
-        );
+        $idoso = $this->buscarIdosoPermitido($idoso->id);
 
-        $tutores = $idoso->users()
-            ->select('users.id', 'users.name', 'users.telefone', 'users.email')
-            ->orderBy('users.name')
-            ->get();
-
-        $contatosEmergencia = $idoso->contatosEmergencia()
-            ->orderBy('prioridade')
-            ->get();
+        $tutores = $idoso->users()->get();
+        $contatosEmergencia = $idoso->contatosEmergencia()->orderBy('prioridade')->get();
 
         return view('contatos.index', compact('idoso', 'tutores', 'contatosEmergencia'));
     }

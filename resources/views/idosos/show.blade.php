@@ -21,8 +21,8 @@
             <a href="{{ route('idosos.edit', $idoso->id) }}" class="btn btn-primary">
                 <i class="bi bi-pencil-square me-1"></i> Editar
             </a>
-            <a href="{{ route('idosos.gerenciar') }}" class="btn btn-outline-secondary">
-                Voltar
+            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar ao painel
             </a>
         </div>
     </div>

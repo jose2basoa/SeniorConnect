@@ -63,7 +63,6 @@ Route::middleware('auth')->group(function () {
         /*
         |--------------------------------------------------------------------------
         | Wizard de cadastro
-        | IMPORTANTE: manter antes das rotas dinâmicas /{idoso}
         |--------------------------------------------------------------------------
         */
         Route::get('/create/step1', [IdosoController::class, 'createStep1'])->name('idosos.create.step1');

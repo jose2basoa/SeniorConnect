@@ -282,7 +282,7 @@
         </div>
     @endif
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div id="historico-eventos" class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4 p-lg-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <div>

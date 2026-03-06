@@ -71,32 +71,32 @@
 <!-- HERO -->
 <section class="py-5 bg-light">
     <div class="container">
-        <div class="row align-items-center g-4">
+        <div class="row align-items-center g-5">
 
             <div class="col-lg-6">
-                <span class="badge bg-primary-subtle text-primary mb-3">
+                <span class="badge bg-primary-subtle text-primary mb-3 px-3 py-2 rounded-pill">
                     Segurança e cuidado em tempo real
                 </span>
 
-                <h1 class="display-6 fw-bold mb-3">
-                    Monitoramento inteligente e assistência remota para quem precisa de acompanhamento.
+                <h1 class="display-5 fw-bold mb-3">
+                    Um painel claro, moderno e prático para acompanhar quem mais importa.
                 </h1>
 
                 <p class="lead text-muted mb-4">
-                    Acompanhe alertas, rotinas e sinais de risco com rapidez — com um painel simples,
-                    pensado para familiares, cuidadores e tutores.
+                    O Sênior Conecta reúne alertas, medicamentos, eventos, contatos e status de monitoramento
+                    em um só lugar, facilitando a rotina de familiares, cuidadores e tutores.
                 </p>
 
                 <div class="d-flex flex-wrap gap-2">
                     @auth
-                        <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg">
+                        <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg px-4">
                             Acessar meu painel
                         </a>
                     @else
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-lg">
+                        <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-4">
                             Criar conta grátis
                         </a>
-                        <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-lg">
+                        <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-lg px-4">
                             Já tenho conta
                         </a>
                     @endauth
@@ -104,38 +104,34 @@
 
                 <div class="d-flex flex-wrap gap-3 mt-4 text-muted">
                     <small><i class="bi bi-lightning-charge me-1"></i> Alertas rápidos</small>
-                    <small><i class="bi bi-geo-alt me-1"></i> Localização</small>
-                    <small><i class="bi bi-bell me-1"></i> Notificações</small>
+                    <small><i class="bi bi-capsule-pill me-1"></i> Controle de medicamentos</small>
+                    <small><i class="bi bi-journal-text me-1"></i> Histórico de eventos</small>
+                    <small><i class="bi bi-people me-1"></i> Contatos úteis</small>
                 </div>
             </div>
 
-            <div class="col-lg-6 text-center">
-                <!-- Placeholder visual (pode trocar por print do dashboard depois) -->
-                <div class="card shadow border-0 rounded-4">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <strong>Painel de Monitoramento</strong>
-                            <span class="badge bg-success">Online</span>
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div class="card-body p-2 p-md-3 bg-white">
+                            <img 
+                                src="{{ asset('media/Dashboard.png') }}" 
+                                alt="Dashboard do Sênior Conecta"
+                                class="img-fluid rounded-4 w-100"
+                            >
                         </div>
-                        <div class="bg-light rounded-3 p-3 text-start">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Última atividade</span>
-                                <span class="fw-semibold">agora</span>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Alertas</span>
-                                <span class="fw-semibold text-danger">2</span>
-                            </div>
-                            <div class="d-flex justify-content-between mt-2">
-                                <span class="text-muted">Próximo medicamento</span>
-                                <span class="fw-semibold">08:00</span>
-                            </div>
-                        </div>
+                    </div>
 
-                        <small class="text-muted d-block mt-3">
-                            (Exemplo ilustrativo — depois você pode colocar um print real do seu dashboard)
-                        </small>
+                    <div class="position-absolute top-0 end-0 translate-middle-y me-3 mt-4 d-none d-md-block">
+                        <span class="badge rounded-pill bg-white text-dark shadow-sm border px-3 py-2">
+                            <i class="bi bi-shield-check text-primary me-1"></i> Interface real do sistema
+                        </span>
+                    </div>
+
+                    <div class="position-absolute bottom-0 end-0 translate-middle-y me-3 d-none d-md-block">
+                        <span class="badge rounded-pill bg-primary px-3 py-2 shadow-sm">
+                            <i class="bi bi-activity me-1"></i> Monitoramento centralizado
+                        </span>
                     </div>
                 </div>
             </div>

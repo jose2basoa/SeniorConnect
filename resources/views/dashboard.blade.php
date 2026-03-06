@@ -178,12 +178,13 @@
             <div class="col-md-3">
                 <div class="card shadow-sm border-0 rounded-4 h-100">
                     <div class="card-body p-4 text-center">
-                        <div class="fs-2 mb-2 text-danger">
+                        <div class="fs-2 mb-2 {{ $alertas > 0 ? 'text-danger' : 'text-success' }}">
                             <i class="bi bi-exclamation-triangle"></i>
                         </div>
                         <div class="text-muted small">Alertas ativos</div>
-                        <div class="fw-bold fs-3 text-danger">{{ $alertas }}</div>
-
+                        <div class="fw-bold fs-3 {{ $alertas > 0 ? 'text-danger' : 'text-success' }}">
+                            {{ $alertas }}
+                        </div>
                         <small class="text-muted d-block">
                             {{ $alertas > 0 ? 'Requer atenção' : 'Tudo certo no momento' }}
                         </small>
@@ -322,17 +323,21 @@
                             <tbody>
                                 @foreach($ultimosEventos as $evento)
 
-                                    @php
-                                        $isAlta = ($evento->gravidade ?? '') === 'alta';
-                                        $badge = $isAlta ? 'bg-danger' : 'bg-secondary';
+                                @php
+                                    $isAlta = ($evento->gravidade ?? '') === 'alta';
+                                    $badge = $isAlta ? 'bg-danger' : 'bg-secondary';
 
-                                        $icone = match($evento->tipo) {
-                                            'queda' => 'bi-person-falling',
-                                            'alerta' => 'bi-exclamation-triangle',
-                                            'localizacao' => 'bi-geo-alt',
-                                            default => 'bi-dot'
-                                        };
-                                    @endphp
+                                    $icone = match($evento->tipo) {
+                                        'queda' => 'bi-exclamation-triangle',
+                                        'medicacao' => 'bi-capsule',
+                                        'sintoma' => 'bi-heart-pulse',
+                                        'consulta' => 'bi-hospital',
+                                        'comportamento' => 'bi-person',
+                                        'rotina' => 'bi-calendar-check',
+                                        'outro' => 'bi-journal-text',
+                                        default => 'bi-dot'
+                                    };
+                                @endphp
 
                                     <tr class="{{ $isAlta ? 'table-danger' : '' }}">
                                         <td class="fw-semibold">
@@ -360,7 +365,8 @@
                     </div>
 
                     <div class="mt-3 d-flex justify-content-end">
-                        <a href="#" class="btn btn-outline-primary btn-sm">
+                        <a href="{{ route('eventos.index', ['idoso' => $idoso->id]) }}#historico-eventos" 
+                        class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-list-ul me-1"></i> Ver histórico completo
                         </a>
                     </div>
