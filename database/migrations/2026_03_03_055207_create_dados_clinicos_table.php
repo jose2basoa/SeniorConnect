@@ -6,31 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('dados_clinicos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idoso_id')->constrained()->onDelete('cascade');
+
+            $table->foreignId('idoso_id')
+                ->constrained('idosos')
+                ->cascadeOnDelete();
 
             $table->string('cartao_sus')->nullable();
             $table->string('plano_saude')->nullable();
             $table->string('numero_plano')->nullable();
-            $table->string('tipo_sanguineo')->nullable();
+            $table->string('tipo_sanguineo', 3)->nullable();
 
             $table->text('alergias')->nullable();
             $table->text('doencas_cronicas')->nullable();
             $table->text('restricoes')->nullable();
 
             $table->timestamps();
+
+            $table->unique('idoso_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('dados_clinicos');

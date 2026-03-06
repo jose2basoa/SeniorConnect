@@ -12,16 +12,25 @@ class Evento extends Model
     protected $fillable = [
         'idoso_id',
         'tipo',
+        'nivel',
+        'origem',
         'descricao',
         'resolvido',
+        'resolvido_em',
+        'data_evento',
     ];
 
-    protected $casts = [
-        'resolvido' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'resolvido' => 'boolean',
+            'resolvido_em' => 'datetime',
+            'data_evento' => 'datetime',
+        ];
+    }
 
     public function idoso()
     {
-        return $this->belongsTo(\App\Models\Idoso::class);
+        return $this->belongsTo(Idoso::class);
     }
 }

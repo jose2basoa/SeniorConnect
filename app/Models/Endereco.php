@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Endereco extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'idoso_id',
         'cep',
-        'rua',
+        'logradouro',
         'numero',
         'complemento',
         'bairro',
         'cidade',
-        'estado'
+        'estado',
     ];
 
     public function idoso()

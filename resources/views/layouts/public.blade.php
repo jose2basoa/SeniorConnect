@@ -1,16 +1,58 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Sênior Conecta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Sênior Conecta')</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="data:,">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+
+        .public-main {
+            min-height: 100vh;
+        }
+    </style>
+
+    @stack('styles')
 </head>
 <body>
 
-@yield('content')
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="{{ route('public.index') }}">
+                <i class="bi bi-shield-check"></i>
+                <span>Sênior Conecta</span>
+            </a>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <div class="d-flex gap-2">
+                @auth
+                    <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm">
+                        Ir para o painel
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
+                        Entrar
+                    </a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm">
+                        Criar conta
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
+    <main class="public-main">
+        @yield('content')
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @stack('scripts')
 </body>
 </html>

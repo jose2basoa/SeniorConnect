@@ -23,9 +23,10 @@ class ContatoController extends Controller
     {
         $idoso = $this->buscarIdosoPermitido($idoso->id);
 
-        $tutores = $idoso->users()->get();
-        $contatosEmergencia = $idoso->contatosEmergencia()->orderBy('prioridade')->get();
-
-        return view('contatos.index', compact('idoso', 'tutores', 'contatosEmergencia'));
+        return view('contatos.index', [
+            'idoso' => $idoso,
+            'tutores' => $idoso->users()->get(),
+            'contatosEmergencia' => $idoso->contatosEmergencia()->orderBy('prioridade')->get(),
+        ]);
     }
 }

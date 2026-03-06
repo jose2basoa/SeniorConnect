@@ -9,7 +9,7 @@
         <div>
             <h4 class="fw-bold mb-1">Endereço</h4>
             <div class="text-muted small">
-                Se não souber tudo agora, pode preencher depois (mas o CEP ajuda bastante).
+                Se não souber tudo agora, pode preencher depois. O CEP ajuda bastante.
             </div>
         </div>
 
@@ -25,7 +25,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger d-flex align-items-start gap-2">
+        <div class="alert alert-danger d-flex align-items-start gap-2 rounded-4">
             <i class="bi bi-exclamation-triangle mt-1"></i>
             <div>
                 <strong>Ops!</strong> Revise os campos destacados.
@@ -58,25 +58,25 @@
                             <button class="btn btn-outline-secondary" type="button" id="btnBuscarCep">
                                 Buscar
                             </button>
-                            @error('cep')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
                         </div>
-                        <div class="form-text">Ao informar o CEP, tentamos completar rua/bairro/cidade/estado.</div>
+                        @error('cep')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">Ao informar o CEP, tentamos completar logradouro, bairro, cidade e estado.</div>
                     </div>
 
                     <div class="col-12 col-md-8">
-                        <label class="form-label fw-semibold">Rua</label>
+                        <label class="form-label fw-semibold">Logradouro</label>
                         <input
                             type="text"
-                            name="rua"
-                            id="rua"
-                            value="{{ old('rua', $endereco->rua ?? '') }}"
-                            class="form-control @error('rua') is-invalid @enderror"
+                            name="logradouro"
+                            id="logradouro"
+                            value="{{ old('logradouro', $endereco->logradouro ?? '') }}"
+                            class="form-control @error('logradouro') is-invalid @enderror"
                             placeholder="Ex.: Rua das Flores"
                             autocomplete="address-line1"
                         >
-                        @error('rua')
+                        @error('logradouro')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -164,11 +164,11 @@
                 <hr class="my-4">
 
                 <div class="d-flex justify-content-between gap-2 flex-wrap">
-                    <a href="{{ route('idosos.create.step1') }}" class="btn btn-outline-secondary px-4">
+                    <a href="{{ route('idosos.create.step1', $idoso->id) }}" class="btn btn-outline-secondary px-4 rounded-3">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
 
-                    <button type="submit" class="btn btn-primary px-4">
+                    <button type="submit" class="btn btn-primary px-4 rounded-3">
                         Próximo <i class="bi bi-arrow-right ms-1"></i>
                     </button>
                 </div>
@@ -185,7 +185,7 @@
     const cepEl = document.getElementById('cep');
     const btn = document.getElementById('btnBuscarCep');
 
-    const rua = document.getElementById('rua');
+    const logradouro = document.getElementById('logradouro');
     const bairro = document.getElementById('bairro');
     const cidade = document.getElementById('cidade');
     const estado = document.getElementById('estado');
@@ -208,13 +208,12 @@
             const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const data = await resp.json();
             if (data && !data.erro) {
-                if (rua && !rua.value) rua.value = data.logradouro || '';
+                if (logradouro && !logradouro.value) logradouro.value = data.logradouro || '';
                 if (bairro && !bairro.value) bairro.value = data.bairro || '';
                 if (cidade && !cidade.value) cidade.value = data.localidade || '';
                 if (estado) estado.value = (data.uf || estado.value || '').toUpperCase();
             }
         } catch (e) {
-            // silencioso por UX
         } finally {
             btn.disabled = false;
             btn.innerText = 'Buscar';

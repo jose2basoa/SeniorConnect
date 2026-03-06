@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -45,6 +46,11 @@ class User extends Authenticatable
 
     public function idosos()
     {
-        return $this->belongsToMany(\App\Models\Idoso::class, 'idoso_user')->withTimestamps();
+        return $this->belongsToMany(Idoso::class, 'idoso_user')->withTimestamps();
+    }
+
+    public function getNomeCompletoAttribute(): string
+    {
+        return trim(($this->name ?? '') . ' ' . ($this->sobrenome ?? ''));
     }
 }

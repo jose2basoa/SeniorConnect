@@ -24,32 +24,49 @@ class RegisteredUserController extends Controller
 
     /**
      * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'sobrenome' => ['required', 'string', 'max:255'],
-            'cpf' => ['required', 'string', 'max:14', 'unique:users'],
-            'telefone' => ['required', 'string', 'max:20'],
-            'data_nascimento' => ['required', 'date'],
-            'cep' => ['required', 'string', 'max:9'],
-            'endereco' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'name' => ['required','string','max:255'],
+            'sobrenome' => ['nullable','string','max:255'],
+
+            'cpf' => ['required','string','max:14','unique:users,cpf'],
+            'telefone' => ['required','string','max:20'],
+            'data_nascimento' => ['nullable','date'],
+
+            'cep' => ['nullable','string','max:9'],
+            'logradouro' => ['nullable','string','max:255'],
+            'numero' => ['nullable','string','max:20'],
+            'bairro' => ['nullable','string','max:255'],
+            'cidade' => ['nullable','string','max:255'],
+            'estado' => ['nullable','string','max:2'],
+            'complemento' => ['nullable','string','max:255'],
+
+            'email' => ['required','string','email','max:255','unique:users,email'],
+
+            'password' => ['required','confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'sobrenome' => $request->sobrenome,
-            'cpf' => $request->cpf,
-            'telefone' => $request->telefone,
+
+            'cpf' => preg_replace('/\D/', '', $request->cpf),
+            'telefone' => preg_replace('/\D/', '', $request->telefone),
+
             'data_nascimento' => $request->data_nascimento,
-            'cep' => $request->cep,
-            'endereco' => $request->endereco,
-            'email' => $request->email,
+
+            'cep' => preg_replace('/\D/', '', $request->cep),
+            'logradouro' => $request->logradouro,
+            'numero' => $request->numero,
+            'bairro' => $request->bairro,
+            'cidade' => $request->cidade,
+            'estado' => $request->estado,
+            'complemento' => $request->complemento,
+
+            'email' => strtolower($request->email),
+
             'password' => Hash::make($request->password),
         ]);
 
@@ -57,6 +74,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('dashboard');
     }
 }

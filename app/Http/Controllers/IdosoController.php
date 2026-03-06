@@ -2,101 +2,93 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Idoso;
-use App\Models\Endereco;
-use App\Models\DadosClinico;
 use App\Models\ContatoEmergencia;
-use App\Models\User;
+use App\Models\DadosClinico;
+use App\Models\Endereco;
+use App\Models\Idoso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class IdosoController extends Controller
 {
-    /* =========================
-        HELPERS
-    ==========================*/
+    private function onlyDigits(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D/', '', $value);
+
+        return $digits !== '' ? $digits : null;
+    }
 
     private function ensureVinculo(Idoso $idoso): void
     {
         $user = Auth::user();
-        if (!$user) {
-            abort(401);
-        }
 
-        // Admin pode acessar qualquer idoso (recomendado)
-        if (!empty($user->is_admin) && $user->is_admin) {
+        abort_unless($user, 401);
+
+        if ($user->is_admin) {
             return;
         }
 
-        // Verifica se o idoso está vinculado ao usuário logado pela pivô
         $vinculado = $idoso->users()
             ->where('users.id', $user->id)
             ->exists();
 
-        if (!$vinculado) {
-            abort(403);
-        }
+        abort_unless($vinculado, 403);
     }
-
-    /* =========================
-        STEP 1 - DADOS PESSOAIS
-    ==========================*/
 
     public function createStep1(Idoso $idoso = null)
     {
+        if ($idoso && $idoso->exists) {
+            $this->ensureVinculo($idoso);
+        }
+
         return view('idosos.steps.step1', compact('idoso'));
     }
 
     public function storeStep1(Request $request, Idoso $idoso = null)
     {
+        $idosoId = $idoso?->id;
+
         $request->validate([
-            'nome' => 'required|string|max:255',
-            'data_nascimento' => 'required|date',
-            'sexo' => 'nullable|string|max:30',
-            'cpf' => 'nullable|string|max:14',
-            'telefone' => 'nullable|string|max:30',
-            'observacoes' => 'nullable|string|max:2000'
-        ], [
-            'nome.required' => 'Informe o nome.',
-            'data_nascimento.required' => 'Informe a data de nascimento.',
-            'data_nascimento.date' => 'Informe uma data válida.',
+            'nome' => ['required', 'string', 'max:255'],
+            'data_nascimento' => ['required', 'date'],
+            'sexo' => ['nullable', 'string', 'max:20'],
+            'cpf' => [
+                'required',
+                'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/',
+                Rule::unique('idosos', 'cpf')->ignore($idosoId),
+            ],
+            'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'observacoes' => ['nullable', 'string', 'max:2000'],
         ]);
+
+        $dados = [
+            'nome' => $request->nome,
+            'data_nascimento' => $request->data_nascimento,
+            'sexo' => $request->sexo,
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
+            'observacoes' => $request->observacoes,
+        ];
 
         if ($idoso && $idoso->exists) {
             $this->ensureVinculo($idoso);
-
-            $idoso->update([
-                'nome' => $request->nome,
-                'data_nascimento' => $request->data_nascimento,
-                'sexo' => $request->sexo,
-                'cpf' => $request->cpf,
-                'telefone' => $request->telefone,
-                'observacoes' => $request->observacoes,
-            ]);
+            $idoso->update($dados);
         } else {
-            $idoso = Idoso::create([
-                'nome' => $request->nome,
-                'data_nascimento' => $request->data_nascimento,
-                'sexo' => $request->sexo,
-                'cpf' => $request->cpf,
-                'telefone' => $request->telefone,
-                'observacoes' => $request->observacoes,
-            ]);
+            $idoso = Idoso::create($dados);
 
-            // vincula na pivô (idoso_user)
             $userId = Auth::id();
-            if (!$userId) abort(401);
+            abort_unless($userId, 401);
 
             $idoso->users()->syncWithoutDetaching([$userId]);
         }
 
         return redirect()->route('idosos.create.step2', $idoso->id);
     }
-
-    /* =========================
-        STEP 2 - ENDEREÇO
-    ==========================*/
 
     public function createStep2(Idoso $idoso)
     {
@@ -112,34 +104,30 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'cep' => 'nullable|string|max:10',
-            'rua' => 'nullable|string|max:255',
-            'numero' => 'nullable|string|max:20',
-            'complemento' => 'nullable|string|max:255',
-            'bairro' => 'nullable|string|max:255',
-            'cidade' => 'nullable|string|max:255',
-            'estado' => 'nullable|string|max:2',
+            'cep' => ['nullable', 'regex:/^\d{5}\-\d{3}$/'],
+            'logradouro' => ['nullable', 'string', 'max:255'],
+            'numero' => ['nullable', 'string', 'max:20'],
+            'complemento' => ['nullable', 'string', 'max:255'],
+            'bairro' => ['nullable', 'string', 'max:255'],
+            'cidade' => ['nullable', 'string', 'max:255'],
+            'estado' => ['nullable', 'string', 'size:2'],
         ]);
 
         Endereco::updateOrCreate(
             ['idoso_id' => $idoso->id],
             [
-                'cep' => $request->cep,
-                'rua' => $request->rua,
+                'cep' => $this->onlyDigits($request->cep),
+                'logradouro' => $request->logradouro,
                 'numero' => $request->numero,
                 'complemento' => $request->complemento,
                 'bairro' => $request->bairro,
                 'cidade' => $request->cidade,
-                'estado' => $request->estado,
+                'estado' => $request->estado ? strtoupper($request->estado) : null,
             ]
         );
 
         return redirect()->route('idosos.create.step3', $idoso->id);
     }
-
-    /* =========================
-        STEP 3 - DADOS CLÍNICOS
-    ==========================*/
 
     public function createStep3(Idoso $idoso)
     {
@@ -155,34 +143,30 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'cartao_sus' => 'nullable|string|max:30',
-            'plano_saude' => 'nullable|string|max:255',
-            'numero_plano' => 'nullable|string|max:50',
-            'tipo_sanguineo' => 'nullable|string|max:10',
-            'alergias' => 'nullable|string|max:2000',
-            'doencas_cronicas' => 'nullable|string|max:2000',
-            'restricoes' => 'nullable|string|max:2000',
+            'cartao_sus' => ['nullable', 'string', 'max:30'],
+            'plano_saude' => ['nullable', 'string', 'max:255'],
+            'numero_plano' => ['nullable', 'string', 'max:50'],
+            'tipo_sanguineo' => ['nullable', 'string', 'max:3'],
+            'alergias' => ['nullable', 'string', 'max:2000'],
+            'doencas_cronicas' => ['nullable', 'string', 'max:2000'],
+            'restricoes' => ['nullable', 'string', 'max:2000'],
         ]);
 
         DadosClinico::updateOrCreate(
             ['idoso_id' => $idoso->id],
-            [
-                'cartao_sus' => $request->cartao_sus,
-                'plano_saude' => $request->plano_saude,
-                'numero_plano' => $request->numero_plano,
-                'tipo_sanguineo' => $request->tipo_sanguineo,
-                'alergias' => $request->alergias,
-                'doencas_cronicas' => $request->doencas_cronicas,
-                'restricoes' => $request->restricoes,
-            ]
+            $request->only([
+                'cartao_sus',
+                'plano_saude',
+                'numero_plano',
+                'tipo_sanguineo',
+                'alergias',
+                'doencas_cronicas',
+                'restricoes',
+            ])
         );
 
         return redirect()->route('idosos.create.step4', $idoso->id);
     }
-
-    /* =========================
-        STEP 4 - CONTATOS
-    ==========================*/
 
     public function createStep4(Idoso $idoso)
     {
@@ -198,10 +182,10 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'contatos' => 'required|array|min:1',
-            'contatos.*.nome' => 'required|string|max:255',
-            'contatos.*.telefone' => 'required|string|max:20',
-            'contatos.*.parentesco' => 'nullable|string|max:255'
+            'contatos' => ['required', 'array', 'min:1'],
+            'contatos.*.nome' => ['required', 'string', 'max:255'],
+            'contatos.*.telefone' => ['required', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'contatos.*.parentesco' => ['nullable', 'string', 'max:255'],
         ]);
 
         $idoso->contatosEmergencia()->delete();
@@ -210,9 +194,9 @@ class IdosoController extends Controller
             ContatoEmergencia::create([
                 'idoso_id' => $idoso->id,
                 'nome' => $contato['nome'],
-                'telefone' => $contato['telefone'],
+                'telefone' => $this->onlyDigits($contato['telefone']),
                 'parentesco' => $contato['parentesco'] ?? null,
-                'prioridade' => $index + 1
+                'prioridade' => $index + 1,
             ]);
         }
 
@@ -220,15 +204,11 @@ class IdosoController extends Controller
             ->with('success', 'Cadastro finalizado com sucesso!');
     }
 
-    /* =========================
-        REMOVER CONTATO
-    ==========================*/
-
     public function removerContato(Idoso $idoso, ContatoEmergencia $contato)
     {
         $this->ensureVinculo($idoso);
 
-        if ($contato->idoso_id != $idoso->id) abort(403);
+        abort_unless((int) $contato->idoso_id === (int) $idoso->id, 403);
 
         if ($idoso->contatosEmergencia()->count() <= 1) {
             return back()->with('error', 'É obrigatório manter pelo menos um contato.');
@@ -238,10 +218,6 @@ class IdosoController extends Controller
 
         return back()->with('success', 'Contato removido com sucesso.');
     }
-
-    /* =========================
-        GERENCIAR / VINCULAR / DESVINCULAR
-    ==========================*/
 
     public function gerenciar()
     {
@@ -268,11 +244,11 @@ class IdosoController extends Controller
     public function vincular(Request $request)
     {
         $request->validate([
-            'cpf' => 'required|string',
-            'data_nascimento' => 'required|date'
+            'cpf' => ['required', 'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/'],
+            'data_nascimento' => ['required', 'date'],
         ]);
 
-        $idoso = Idoso::where('cpf', $request->cpf)
+        $idoso = Idoso::where('cpf', $this->onlyDigits($request->cpf))
             ->where('data_nascimento', $request->data_nascimento)
             ->first();
 
@@ -281,7 +257,7 @@ class IdosoController extends Controller
         }
 
         $userId = Auth::id();
-        if (!$userId) abort(401);
+        abort_unless($userId, 401);
 
         $idoso->users()->syncWithoutDetaching([$userId]);
 
@@ -295,7 +271,7 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $user = Auth::user();
-        if (!$user) abort(401);
+        abort_unless($user, 401);
 
         $temVinculo = $idoso->users()
             ->where('users.id', $user->id)
@@ -317,10 +293,6 @@ class IdosoController extends Controller
         return view('idosos.escolher-cadastro');
     }
 
-    /* =========================
-        PERFIL / EDITAR DADOS (NOVO)
-    ==========================*/
-
     public function show(Idoso $idoso)
     {
         $this->ensureVinculo($idoso);
@@ -339,29 +311,31 @@ class IdosoController extends Controller
         return view('idosos.edit', compact('idoso'));
     }
 
-    /* =========================
-        UPDATE SEPARADO POR STEP
-    ==========================*/
-
     public function updateStep1(Request $request, Idoso $idoso)
     {
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'nome' => 'required|string|max:255',
-            'data_nascimento' => 'required|date',
-            'sexo' => 'nullable|string|max:30',
-            'cpf' => 'nullable|string|max:14',
-            'telefone' => 'nullable|string|max:30',
-            'observacoes' => 'nullable|string|max:2000',
-        ], [
-            'nome.required' => 'Informe o nome.',
-            'data_nascimento.required' => 'Informe a data de nascimento.',
+            'nome' => ['required', 'string', 'max:255'],
+            'data_nascimento' => ['required', 'date'],
+            'sexo' => ['nullable', 'string', 'max:20'],
+            'cpf' => [
+                'required',
+                'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/',
+                Rule::unique('idosos', 'cpf')->ignore($idoso->id),
+            ],
+            'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'observacoes' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $idoso->update($request->only([
-            'nome', 'data_nascimento', 'sexo', 'cpf', 'telefone', 'observacoes'
-        ]));
+        $idoso->update([
+            'nome' => $request->nome,
+            'data_nascimento' => $request->data_nascimento,
+            'sexo' => $request->sexo,
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
+            'observacoes' => $request->observacoes,
+        ]);
 
         return back()->with('success_step1', 'Dados pessoais atualizados!');
     }
@@ -371,18 +345,26 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'cep' => 'nullable|string|max:10',
-            'rua' => 'nullable|string|max:255',
-            'numero' => 'nullable|string|max:20',
-            'complemento' => 'nullable|string|max:255',
-            'bairro' => 'nullable|string|max:255',
-            'cidade' => 'nullable|string|max:255',
-            'estado' => 'nullable|string|max:2',
+            'cep' => ['nullable', 'regex:/^\d{5}\-\d{3}$/'],
+            'logradouro' => ['nullable', 'string', 'max:255'],
+            'numero' => ['nullable', 'string', 'max:20'],
+            'complemento' => ['nullable', 'string', 'max:255'],
+            'bairro' => ['nullable', 'string', 'max:255'],
+            'cidade' => ['nullable', 'string', 'max:255'],
+            'estado' => ['nullable', 'string', 'size:2'],
         ]);
 
         Endereco::updateOrCreate(
             ['idoso_id' => $idoso->id],
-            $request->only(['cep','rua','numero','complemento','bairro','cidade','estado'])
+            [
+                'cep' => $this->onlyDigits($request->cep),
+                'logradouro' => $request->logradouro,
+                'numero' => $request->numero,
+                'complemento' => $request->complemento,
+                'bairro' => $request->bairro,
+                'cidade' => $request->cidade,
+                'estado' => $request->estado ? strtoupper($request->estado) : null,
+            ]
         );
 
         return back()->with('success_step2', 'Endereço atualizado!');
@@ -393,20 +375,25 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'cartao_sus' => 'nullable|string|max:30',
-            'plano_saude' => 'nullable|string|max:255',
-            'numero_plano' => 'nullable|string|max:50',
-            'tipo_sanguineo' => 'nullable|string|max:10',
-            'alergias' => 'nullable|string|max:2000',
-            'doencas_cronicas' => 'nullable|string|max:2000',
-            'restricoes' => 'nullable|string|max:2000',
+            'cartao_sus' => ['nullable', 'string', 'max:30'],
+            'plano_saude' => ['nullable', 'string', 'max:255'],
+            'numero_plano' => ['nullable', 'string', 'max:50'],
+            'tipo_sanguineo' => ['nullable', 'string', 'max:3'],
+            'alergias' => ['nullable', 'string', 'max:2000'],
+            'doencas_cronicas' => ['nullable', 'string', 'max:2000'],
+            'restricoes' => ['nullable', 'string', 'max:2000'],
         ]);
 
         DadosClinico::updateOrCreate(
             ['idoso_id' => $idoso->id],
             $request->only([
-                'cartao_sus','plano_saude','numero_plano','tipo_sanguineo',
-                'alergias','doencas_cronicas','restricoes'
+                'cartao_sus',
+                'plano_saude',
+                'numero_plano',
+                'tipo_sanguineo',
+                'alergias',
+                'doencas_cronicas',
+                'restricoes',
             ])
         );
 
@@ -418,14 +405,10 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'contatos' => 'required|array|min:1',
-            'contatos.*.nome' => 'required|string|max:255',
-            'contatos.*.telefone' => 'required|string|max:20',
-            'contatos.*.parentesco' => 'nullable|string|max:255',
-        ], [
-            'contatos.required' => 'Adicione pelo menos 1 contato.',
-            'contatos.*.nome.required' => 'Nome do contato é obrigatório.',
-            'contatos.*.telefone.required' => 'Telefone do contato é obrigatório.',
+            'contatos' => ['required', 'array', 'min:1'],
+            'contatos.*.nome' => ['required', 'string', 'max:255'],
+            'contatos.*.telefone' => ['required', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'contatos.*.parentesco' => ['nullable', 'string', 'max:255'],
         ]);
 
         $idoso->contatosEmergencia()->delete();
@@ -434,7 +417,7 @@ class IdosoController extends Controller
             ContatoEmergencia::create([
                 'idoso_id' => $idoso->id,
                 'nome' => $c['nome'],
-                'telefone' => $c['telefone'],
+                'telefone' => $this->onlyDigits($c['telefone']),
                 'parentesco' => $c['parentesco'] ?? null,
                 'prioridade' => $index + 1,
             ]);
@@ -448,24 +431,24 @@ class IdosoController extends Controller
         $this->ensureVinculo($idoso);
 
         $request->validate([
-            'nome' => 'required|string|max:255',
-            'data_nascimento' => 'required|date',
-            'sexo' => 'nullable|string|max:30',
-            'cpf' => 'nullable|string|max:14',
-            'telefone' => 'nullable|string|max:30',
-            'observacoes' => 'nullable|string|max:2000',
-        ], [
-            'nome.required' => 'Informe o nome.',
-            'data_nascimento.required' => 'Informe a data de nascimento.',
-            'data_nascimento.date' => 'Informe uma data válida.',
+            'nome' => ['required', 'string', 'max:255'],
+            'data_nascimento' => ['required', 'date'],
+            'sexo' => ['nullable', 'string', 'max:20'],
+            'cpf' => [
+                'required',
+                'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/',
+                Rule::unique('idosos', 'cpf')->ignore($idoso->id),
+            ],
+            'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'observacoes' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $idoso->update([
             'nome' => $request->nome,
             'data_nascimento' => $request->data_nascimento,
             'sexo' => $request->sexo,
-            'cpf' => $request->cpf,
-            'telefone' => $request->telefone,
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
             'observacoes' => $request->observacoes,
         ]);
 
@@ -478,12 +461,13 @@ class IdosoController extends Controller
     {
         $user = auth()->user();
 
-        // evita duplicar vínculo
+        abort_unless($user, 401);
+        abort_unless($user->is_admin, 403);
+
         if (!$idoso->users()->where('users.id', $user->id)->exists()) {
             $idoso->users()->attach($user->id);
         }
 
         return back()->with('success', 'Vínculo realizado com sucesso.');
     }
-
 }

@@ -58,6 +58,13 @@
         ],
     ];
 
+    $niveisMap = [
+        'baixo' => ['label' => 'Baixo', 'badge' => 'text-bg-success'],
+        'medio' => ['label' => 'Médio', 'badge' => 'text-bg-secondary'],
+        'alto' => ['label' => 'Alto', 'badge' => 'text-bg-warning'],
+        'critico' => ['label' => 'Crítico', 'badge' => 'text-bg-danger'],
+    ];
+
     $tiposResumo = $eventos
         ->groupBy(fn($evento) => strtolower((string) data_get($evento, 'tipo', 'outro')))
         ->sortByDesc(fn($grupo) => $grupo->count());
@@ -85,7 +92,7 @@
                         <p class="text-muted mb-0" style="max-width: 760px;">
                             Acompanhe ocorrências, intercorrências e situações importantes relacionadas a
                             <span class="fw-semibold text-dark">{{ $idoso->nome }}</span>,
-                            com histórico completo, status de resolução e acesso rápido às principais ações.
+                            com histórico completo, nível de atenção, status e acesso rápido às ações principais.
                         </p>
                     </div>
 
@@ -260,6 +267,9 @@
 
                                         $dataBruta = data_get($evento, 'data_evento') ?: data_get($evento, 'created_at');
                                         $dataFormatada = $dataBruta ? Carbon::parse($dataBruta)->format('d/m/Y H:i') : '—';
+
+                                        $nivelKey = strtolower((string) data_get($evento, 'nivel', 'medio'));
+                                        $nivel = $niveisMap[$nivelKey] ?? $niveisMap['medio'];
                                     @endphp
 
                                     <div class="border rounded-4 p-3">
@@ -268,6 +278,10 @@
                                                 <i class="bi {{ $config['icon'] }} me-1"></i>{{ $config['label'] }}
                                             </span>
                                             <small class="text-muted">{{ $dataFormatada }}</small>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <span class="badge {{ $nivel['badge'] }}">{{ $nivel['label'] }}</span>
                                         </div>
 
                                         <div class="fw-semibold mb-1">{{ Str::limit($evento->descricao, 70) }}</div>
@@ -323,6 +337,7 @@
                             <tr>
                                 <th class="rounded-start-4 border-0 ps-3">Categoria</th>
                                 <th class="border-0">Descrição</th>
+                                <th class="border-0">Nível</th>
                                 <th class="border-0">Data</th>
                                 <th class="border-0">Status</th>
                                 <th class="rounded-end-4 border-0 text-end pe-3">Ações</th>
@@ -339,6 +354,9 @@
 
                                     $dataBruta = data_get($evento, 'data_evento') ?: data_get($evento, 'created_at');
                                     $dataFormatada = $dataBruta ? Carbon::parse($dataBruta)->format('d/m/Y H:i') : '—';
+
+                                    $nivelKey = strtolower((string) data_get($evento, 'nivel', 'medio'));
+                                    $nivel = $niveisMap[$nivelKey] ?? $niveisMap['medio'];
                                 @endphp
 
                                 <tr>
@@ -349,9 +367,13 @@
                                         </span>
                                     </td>
 
-                                    <td style="min-width: 340px;">
+                                    <td style="min-width: 320px;">
                                         <div class="fw-semibold mb-1">{{ Str::limit($descricao, 95) }}</div>
                                         <div class="text-muted small">Registro #{{ $evento->id }}</div>
+                                    </td>
+
+                                    <td style="min-width: 120px;">
+                                        <span class="badge {{ $nivel['badge'] }}">{{ $nivel['label'] }}</span>
                                     </td>
 
                                     <td class="text-muted small" style="min-width: 140px;">

@@ -7,6 +7,7 @@
     $busca = request('busca');
     $status = request('status');
     $frequenciaFiltro = request('frequencia');
+    $ativoFiltro = request('ativo');
 
     $frequenciasDisponiveis = $medicamentos
         ->pluck('frequencia')
@@ -15,10 +16,11 @@
         ->sort()
         ->values();
 
-    $medicamentosFiltrados = $medicamentos->filter(function ($medicamento) use ($busca, $status, $frequenciaFiltro) {
+    $medicamentosFiltrados = $medicamentos->filter(function ($medicamento) use ($busca, $status, $frequenciaFiltro, $ativoFiltro) {
         $matchBusca = true;
         $matchStatus = true;
         $matchFrequencia = true;
+        $matchAtivo = true;
 
         if ($busca) {
             $texto = mb_strtolower(
@@ -40,12 +42,19 @@
             $matchFrequencia = ($medicamento->frequencia ?? null) === $frequenciaFiltro;
         }
 
-        return $matchBusca && $matchStatus && $matchFrequencia;
+        if ($ativoFiltro === 'ativos') {
+            $matchAtivo = (bool) $medicamento->ativo === true;
+        } elseif ($ativoFiltro === 'inativos') {
+            $matchAtivo = (bool) $medicamento->ativo === false;
+        }
+
+        return $matchBusca && $matchStatus && $matchFrequencia && $matchAtivo;
     })->values();
 
     $total = $medicamentos->count();
     $tomados = $medicamentos->where('tomado', true)->count();
     $pendentes = $medicamentos->where('tomado', false)->count();
+    $ativos = $medicamentos->where('ativo', true)->count();
 @endphp
 
 <div class="container py-5">
@@ -82,7 +91,7 @@
     @endif
 
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border shadow-sm rounded-4 h-100 bg-white">
                 <div class="card-body p-4">
                     <div class="text-muted small mb-1">Total de medicamentos</div>
@@ -91,7 +100,16 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <div class="card border shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-4">
+                    <div class="text-muted small mb-1">Ativos</div>
+                    <div class="fw-bold fs-3 text-primary">{{ $ativos }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
             <div class="card border shadow-sm rounded-4 h-100 bg-white">
                 <div class="card-body p-4">
                     <div class="text-muted small mb-1">Marcados como tomados</div>
@@ -100,7 +118,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border shadow-sm rounded-4 h-100 bg-white">
                 <div class="card-body p-4">
                     <div class="text-muted small mb-1">Pendentes</div>
@@ -115,13 +133,13 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <div>
                     <h5 class="fw-bold mb-1">Filtrar medicamentos</h5>
-                    <small class="text-muted">Busque por nome, filtre por status ou frequência.</small>
+                    <small class="text-muted">Busque por nome, filtre por status, atividade ou frequência.</small>
                 </div>
             </div>
 
             <form method="GET" action="{{ route('medicamentos.index', $idoso->id) }}">
                 <div class="row g-3 align-items-end">
-                    <div class="col-lg-5">
+                    <div class="col-lg-4">
                         <label for="busca" class="form-label fw-bold">Buscar</label>
                         <input
                             type="text"
@@ -142,7 +160,16 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4 col-lg-3">
+                    <div class="col-md-3 col-lg-2">
+                        <label for="ativo" class="form-label fw-bold">Situação</label>
+                        <select name="ativo" id="ativo" class="form-select rounded-3">
+                            <option value="">Todos</option>
+                            <option value="ativos" {{ request('ativo') === 'ativos' ? 'selected' : '' }}>Ativos</option>
+                            <option value="inativos" {{ request('ativo') === 'inativos' ? 'selected' : '' }}>Inativos</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 col-lg-2">
                         <label for="frequencia" class="form-label fw-bold">Frequência</label>
                         <select name="frequencia" id="frequencia" class="form-select rounded-3">
                             <option value="">Todas</option>
@@ -161,7 +188,7 @@
                     </div>
                 </div>
 
-                @if(request()->filled('busca') || request()->filled('status') || request()->filled('frequencia'))
+                @if(request()->filled('busca') || request()->filled('status') || request()->filled('frequencia') || request()->filled('ativo'))
                     <div class="mt-3">
                         <a href="{{ route('medicamentos.index', $idoso->id) }}" class="btn btn-light border rounded-3 px-4">
                             <i class="bi bi-x-circle me-1"></i> Limpar filtros
@@ -178,7 +205,7 @@
                 <div>
                     <h4 class="fw-bold mb-1">Lista de medicamentos</h4>
                     <p class="text-muted mb-0">
-                        Visualize horários, frequência, observações e status de uso.
+                        Visualize horários, frequência, período, observações e status de uso.
                     </p>
                 </div>
 
@@ -229,6 +256,9 @@
                             $frequencia = data_get($medicamento, 'frequencia');
                             $observacoes = data_get($medicamento, 'observacoes');
                             $tomado = (bool) data_get($medicamento, 'tomado', false);
+                            $ativo = (bool) data_get($medicamento, 'ativo', true);
+                            $dataInicio = data_get($medicamento, 'data_inicio');
+                            $dataFim = data_get($medicamento, 'data_fim');
                         @endphp
 
                         <div class="col-md-6 col-xl-4">
@@ -249,15 +279,27 @@
                                             @endif
                                         </div>
 
-                                        @if($tomado)
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-3 px-3 py-2">
-                                                Tomado
-                                            </span>
-                                        @else
-                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-3 px-3 py-2">
-                                                Pendente
-                                            </span>
-                                        @endif
+                                        <div class="d-flex flex-column gap-2 align-items-end">
+                                            @if($ativo)
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-3 px-3 py-2">
+                                                    Ativo
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-3 px-3 py-2">
+                                                    Inativo
+                                                </span>
+                                            @endif
+
+                                            @if($tomado)
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-3 px-3 py-2">
+                                                    Tomado
+                                                </span>
+                                            @else
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-3 px-3 py-2">
+                                                    Pendente
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
 
                                     <div class="bg-light-subtle border rounded-4 p-3 mb-3">
@@ -276,10 +318,17 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-12">
-                                                <div class="text-muted mb-1">Cadastro</div>
+                                            <div class="col-6">
+                                                <div class="text-muted mb-1">Início</div>
                                                 <div class="fw-bold">
-                                                    {{ optional($medicamento->created_at)->format('d/m/Y \à\s H:i') ?? '—' }}
+                                                    {{ $dataInicio ? \Carbon\Carbon::parse($dataInicio)->format('d/m/Y') : '—' }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <div class="text-muted mb-1">Término</div>
+                                                <div class="fw-bold">
+                                                    {{ $dataFim ? \Carbon\Carbon::parse($dataFim)->format('d/m/Y') : 'Uso contínuo' }}
                                                 </div>
                                             </div>
                                         </div>

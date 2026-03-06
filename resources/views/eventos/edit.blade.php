@@ -2,8 +2,6 @@
 
 @section('content')
 @php
-    use Carbon\Carbon;
-
     $tipos = [
         'queda' => ['label' => 'Queda', 'icon' => 'bi-person-fill-exclamation'],
         'medicacao' => ['label' => 'Medicação', 'icon' => 'bi-capsule-pill'],
@@ -14,8 +12,18 @@
         'outro' => ['label' => 'Outro', 'icon' => 'bi-journal-text'],
     ];
 
-    $dataRegistro = $evento->created_at ? Carbon::parse($evento->created_at)->format('d/m/Y H:i') : '—';
-    $dataAtualizacao = $evento->updated_at ? Carbon::parse($evento->updated_at)->format('d/m/Y H:i') : '—';
+    $niveis = [
+        'baixo' => ['label' => 'Baixo', 'class' => 'success'],
+        'medio' => ['label' => 'Médio', 'class' => 'secondary'],
+        'alto' => ['label' => 'Alto', 'class' => 'warning'],
+        'critico' => ['label' => 'Crítico', 'class' => 'danger'],
+    ];
+
+    $origens = [
+        'manual' => 'Registro manual',
+        'sistema' => 'Sistema',
+        'app' => 'Aplicativo',
+    ];
 @endphp
 
 <div class="container py-5">
@@ -25,16 +33,16 @@
             <div class="card-body p-4 p-lg-5">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                     <div>
-                        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-secondary-subtle text-secondary-emphasis border mb-3">
-                            <i class="bi bi-pencil-square"></i>
-                            <span class="fw-semibold small">Atualização de registro</span>
+                        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-primary-subtle text-primary-emphasis border mb-3">
+                            <i class="bi bi-plus-circle"></i>
+                            <span class="fw-semibold small">Novo registro</span>
                         </div>
 
-                        <h2 class="fw-bold mb-2">Editar evento</h2>
+                        <h2 class="fw-bold mb-2">Cadastrar evento</h2>
                         <p class="text-muted mb-0" style="max-width: 760px;">
-                            Atualize as informações do registro vinculado a
+                            Registre uma nova ocorrência relacionada a
                             <span class="fw-semibold text-dark">{{ $idoso->nome }}</span>,
-                            mantendo o histórico sempre correto e fácil de consultar.
+                            mantendo o histórico atualizado e facilitando o acompanhamento.
                         </p>
                     </div>
 
@@ -66,27 +74,71 @@
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4 p-lg-4">
                     <div class="mb-4">
-                        <h5 class="fw-bold mb-1">Editar informações do evento</h5>
-                        <small class="text-muted">Faça os ajustes necessários e salve as alterações.</small>
+                        <h5 class="fw-bold mb-1">Informações do evento</h5>
+                        <small class="text-muted">Preencha os dados principais do registro.</small>
                     </div>
 
-                    <form action="{{ route('eventos.update', ['idoso' => $idoso->id, 'evento' => $evento->id]) }}" method="POST">
+                    <form action="{{ route('eventos.store', ['idoso' => $idoso->id]) }}" method="POST">
                         @csrf
-                        @method('PUT')
 
-                        <div class="mb-4">
-                            <label for="tipo" class="form-label fw-semibold">Categoria do evento</label>
-                            <select name="tipo" id="tipo" class="form-select form-select-lg rounded-3 @error('tipo') is-invalid @enderror" required>
-                                <option value="">Selecione uma categoria</option>
-                                @foreach($tipos as $valor => $config)
-                                    <option value="{{ $valor }}" {{ old('tipo', $evento->tipo) === $valor ? 'selected' : '' }}>
-                                        {{ $config['label'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('tipo')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="tipo" class="form-label fw-semibold">Categoria do evento</label>
+                                <select name="tipo" id="tipo" class="form-select rounded-3 @error('tipo') is-invalid @enderror" required>
+                                    <option value="">Selecione uma categoria</option>
+                                    @foreach($tipos as $valor => $config)
+                                        <option value="{{ $valor }}" {{ old('tipo') === $valor ? 'selected' : '' }}>
+                                            {{ $config['label'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('tipo')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="nivel" class="form-label fw-semibold">Nível de atenção</label>
+                                <select name="nivel" id="nivel" class="form-select rounded-3 @error('nivel') is-invalid @enderror" required>
+                                    @foreach($niveis as $valor => $config)
+                                        <option value="{{ $valor }}" {{ old('nivel', 'medio') === $valor ? 'selected' : '' }}>
+                                            {{ $config['label'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('nivel')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="origem" class="form-label fw-semibold">Origem do registro</label>
+                                <select name="origem" id="origem" class="form-select rounded-3 @error('origem') is-invalid @enderror">
+                                    @foreach($origens as $valor => $label)
+                                        <option value="{{ $valor }}" {{ old('origem', 'manual') === $valor ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('origem')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="data_evento" class="form-label fw-semibold">Data e hora do ocorrido</label>
+                                <input
+                                    type="datetime-local"
+                                    name="data_evento"
+                                    id="data_evento"
+                                    value="{{ old('data_evento', now()->format('Y-m-d\TH:i')) }}"
+                                    class="form-control rounded-3 @error('data_evento') is-invalid @enderror"
+                                >
+                                @error('data_evento')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">Use o horário real da ocorrência, quando souber.</div>
+                            </div>
                         </div>
 
                         <div class="mb-4">
@@ -96,23 +148,23 @@
                                 id="descricao"
                                 rows="8"
                                 class="form-control rounded-3 @error('descricao') is-invalid @enderror"
-                                placeholder="Descreva de forma clara o que aconteceu e as providências adotadas."
+                                placeholder="Descreva o que aconteceu, quando ocorreu, como a situação foi identificada e quais providências foram tomadas."
                                 required
-                            >{{ old('descricao', $evento->descricao) }}</textarea>
+                            >{{ old('descricao') }}</textarea>
                             @error('descricao')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">
-                                Mantenha o registro objetivo e útil para consultas futuras.
+                                Uma boa descrição ajuda no acompanhamento e no entendimento do histórico.
                             </div>
                         </div>
 
                         <div class="border rounded-4 p-3 p-md-4 bg-light-subtle mb-4">
                             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                                 <div>
-                                    <div class="fw-semibold mb-1">Status do evento</div>
+                                    <div class="fw-semibold mb-1">Status inicial do registro</div>
                                     <div class="text-muted small">
-                                        Atualize o status para refletir a situação atual do registro.
+                                        Marque como resolvido apenas se a ocorrência já estiver concluída.
                                     </div>
                                 </div>
 
@@ -124,7 +176,7 @@
                                         id="resolvido"
                                         name="resolvido"
                                         value="1"
-                                        {{ old('resolvido', $evento->resolvido) ? 'checked' : '' }}
+                                        {{ old('resolvido') ? 'checked' : '' }}
                                     >
                                     <label class="form-check-label fw-semibold ms-2" for="resolvido">
                                         Evento resolvido
@@ -138,33 +190,10 @@
                                 Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary rounded-3 px-4">
-                                <i class="bi bi-check2-circle me-1"></i> Salvar alterações
+                                <i class="bi bi-check2-circle me-1"></i> Salvar evento
                             </button>
                         </div>
                     </form>
-
-                    <div class="border-top mt-4 pt-4">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                            <div>
-                                <div class="fw-semibold text-danger mb-1">Zona de exclusão</div>
-                                <small class="text-muted">
-                                    Exclua este registro apenas se tiver certeza. Esta ação não poderá ser desfeita.
-                                </small>
-                            </div>
-
-                            <form action="{{ route('eventos.destroy', ['idoso' => $idoso->id, 'evento' => $evento->id]) }}"
-                                  method="POST"
-                                  class="m-0"
-                                  onsubmit="return confirm('Deseja excluir este evento?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger rounded-3">
-                                    <i class="bi bi-trash me-1"></i> Excluir evento
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -172,36 +201,16 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">Detalhes do registro</h6>
+                    <h6 class="fw-bold mb-3">Pessoa acompanhada</h6>
 
-                    <div class="d-flex flex-column gap-3 small">
-                        <div>
-                            <span class="text-muted d-block">Código do evento</span>
-                            <span class="fw-semibold">#{{ $evento->id }}</span>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center shadow-sm"
+                             style="width: 60px; height: 60px;">
+                            <i class="bi bi-person fs-4 text-secondary"></i>
                         </div>
-
                         <div>
-                            <span class="text-muted d-block">Status atual</span>
-                            @if($evento->resolvido)
-                                <span class="badge text-bg-success rounded-pill px-3 py-2">Resolvido</span>
-                            @else
-                                <span class="badge text-bg-warning rounded-pill px-3 py-2">Pendente</span>
-                            @endif
-                        </div>
-
-                        <div>
-                            <span class="text-muted d-block">Pessoa acompanhada</span>
-                            <span class="fw-semibold">{{ $idoso->nome }}</span>
-                        </div>
-
-                        <div>
-                            <span class="text-muted d-block">Criado em</span>
-                            <span class="fw-semibold">{{ $dataRegistro }}</span>
-                        </div>
-
-                        <div>
-                            <span class="text-muted d-block">Última atualização</span>
-                            <span class="fw-semibold">{{ $dataAtualizacao }}</span>
+                            <div class="fw-semibold">{{ $idoso->nome }}</div>
+                            <div class="text-muted small">Cadastro #{{ $idoso->id }}</div>
                         </div>
                     </div>
                 </div>
@@ -224,11 +233,13 @@
 
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">Orientação</h6>
+                    <h6 class="fw-bold mb-3">Boas práticas de registro</h6>
+
                     <div class="small text-muted">
-                        <p class="mb-2">Atualize a descrição sempre que houver nova informação.</p>
-                        <p class="mb-2">Use o status resolvido apenas quando o caso estiver concluído.</p>
-                        <p class="mb-0">Mantenha o histórico limpo, claro e útil para acompanhamento.</p>
+                        <p class="mb-2">Descreva a situação com clareza e objetividade.</p>
+                        <p class="mb-2">Defina o nível de atenção de forma realista.</p>
+                        <p class="mb-2">Informe a data do ocorrido sempre que possível.</p>
+                        <p class="mb-0">Registros bem feitos tornam o histórico muito mais útil.</p>
                     </div>
                 </div>
             </div>

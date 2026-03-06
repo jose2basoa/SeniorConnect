@@ -26,7 +26,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger d-flex align-items-start gap-2">
+        <div class="alert alert-danger d-flex align-items-start gap-2 rounded-4">
             <i class="bi bi-exclamation-triangle mt-1"></i>
             <div>
                 <strong>Ops!</strong> Revise os campos destacados.
@@ -34,11 +34,10 @@
         </div>
     @endif
 
-    <div id="card-clinico" class="card shadow-sm border-0 rounded-4 mb-4 js-card">
-
+    <div class="card shadow-sm border-0 rounded-4 mb-4 js-card">
         <div class="card-body p-4">
             @php
-                $c = $clinico ?? null;
+                $c = $dadosClinico ?? null;
 
                 $planosFamosos = [
                     'Unimed','Bradesco Saúde','SulAmérica','Amil',
@@ -162,11 +161,11 @@
                 <hr class="my-4">
 
                 <div class="d-flex justify-content-between gap-2 flex-wrap">
-                    <a href="{{ route('idosos.create.step2', $idoso->id) }}" class="btn btn-outline-secondary px-4">
+                    <a href="{{ route('idosos.create.step2', $idoso->id) }}" class="btn btn-outline-secondary px-4 rounded-3">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
 
-                    <button type="submit" class="btn btn-primary px-4">
+                    <button type="submit" class="btn btn-primary px-4 rounded-3">
                         Próximo <i class="bi bi-arrow-right ms-1"></i>
                     </button>
                 </div>

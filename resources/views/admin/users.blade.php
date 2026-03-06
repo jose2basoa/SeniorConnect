@@ -3,30 +3,41 @@
 @section('content')
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Usuários Cadastrados</h2>
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Usuários cadastrados</h2>
+            <small class="text-muted">Gerencie administradores e tutores vinculados ao sistema.</small>
+        </div>
         <span class="badge bg-primary fs-6">Total: {{ $users->count() }}</span>
     </div>
 
-    @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
-    @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
+    @if(session('success'))
+        <div class="alert alert-success rounded-4">{{ session('success') }}</div>
+    @endif
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+    @if(session('error'))
+        <div class="alert alert-danger rounded-4">{{ session('error') }}</div>
+    @endif
 
-            @if($users->isEmpty())
+    @if($errors->any())
+        <div class="alert alert-danger rounded-4">
+            <ul class="mb-0 ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex gap-2 flex-wrap mb-3 align-items-center">
                 <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle me-1"></i> Novo usuário
                 </a>
 
-                <div class="alert alert-info mt-2">Nenhum usuário cadastrado.</div>
-            @else
-
-                <div class="d-flex gap-2 flex-wrap mb-3 align-items-center">
-                    <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-plus-circle me-1"></i> Novo usuário
-                    </a>
-
+                @if($users->isNotEmpty())
                     <button id="btnToggleSelectUser" class="btn btn-outline-primary btn-sm" type="button">
                         <i class="bi bi-check2-square me-1"></i> Selecionar
                     </button>
@@ -38,42 +49,58 @@
                     <button id="btnClearUsers" class="btn btn-outline-secondary btn-sm d-none" type="button">
                         Limpar seleção
                     </button>
-                        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
-                            <input
-                                type="text"
-                                id="searchUsers"
-                                class="form-control form-control-sm"
-                                placeholder="Pesquisar usuário..."
-                                style="width: 220px;"
-                            >
+                @endif
 
-                            <select id="filterTypeUsers" class="form-select form-select-sm" style="width: 140px;">
-                                <option value="all" selected>Todos</option>
-                                <option value="admin">Admins</option>
-                                <option value="tutor">Tutores</option>
-                            </select>
+                <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+                    <input
+                        type="text"
+                        id="searchUsers"
+                        class="form-control form-control-sm"
+                        placeholder="Pesquisar usuário..."
+                        style="width: 220px;"
+                    >
 
-                            <div class="d-flex align-items-center gap-2">
-                                <label class="small text-muted mb-0">Linhas:</label>
-                                <select id="rowsPerPageUsers" class="form-select form-select-sm" style="width: 85px;">
-                                    <option value="10" selected>10</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
-                            </div>
-                        </div>
+                    <select id="filterTypeUsers" class="form-select form-select-sm" style="width: 140px;">
+                        <option value="all" selected>Todos</option>
+                        <option value="admin">Admins</option>
+                        <option value="tutor">Tutores</option>
+                    </select>
 
-                    <button id="btnDeleteUsers"
-                        class="btn btn-outline-danger btn-sm d-none"
-                        disabled
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalDeleteUsers">
-                        <i class="bi bi-trash me-1"></i> Apagar selecionados
-                    </button>
+                    <select id="filterStatusUsers" class="form-select form-select-sm" style="width: 150px;">
+                        <option value="all" selected>Todos status</option>
+                        <option value="ativo">Ativos</option>
+                        <option value="removido">Removidos</option>
+                    </select>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small text-muted mb-0">Linhas:</label>
+                        <select id="rowsPerPageUsers" class="form-select form-select-sm" style="width: 85px;">
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
                 </div>
 
+                @if($users->isNotEmpty())
+                    <button id="btnDeleteUsers"
+                            class="btn btn-outline-danger btn-sm d-none"
+                            disabled
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalDeleteUsers">
+                        <i class="bi bi-person-dash me-1"></i> Remover selecionados
+                    </button>
+                @endif
+            </div>
+
+            @if($users->isEmpty())
+                <div class="alert alert-info rounded-4 mb-0">
+                    Nenhum usuário cadastrado até o momento.
+                </div>
+            @else
                 <div class="small text-muted mb-3">
-                    Se apagar o usuário logado, você será deslogado automaticamente.
+                    Se o usuário logado for removido, a sessão será encerrada automaticamente.
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -85,38 +112,101 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th class="text-center js-col-select d-none" style="width: 40px;">
                                     <input class="form-check-input" type="checkbox" id="chkAllUsers">
                                 </th>
                                 <th>Nome</th>
-                                <th>Email</th>
-                                <th>CPF</th>
-                                <th>Qtd. Idosos</th>
+                                <th class="d-none d-md-table-cell">Email</th>
+                                <th class="d-none d-lg-table-cell">CPF</th>
+                                <th class="d-none d-xl-table-cell">Qtd. acompanhados</th>
                                 <th>Status</th>
+                                <th class="text-end js-actions-col">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyUsers">
+                        <tbody>
                             @foreach($users as $u)
-                                <tr class="js-user-row" data-type="{{ $u->is_admin ? 'admin' : 'tutor' }}" data-search="{{ strtolower($u->name . ' ' . $u->email . ' ' . $u->cpf) }}">
+                                <tr class="js-user-row"
+                                    data-type="{{ $u->is_admin ? 'admin' : 'tutor' }}"
+                                    data-status="{{ $u->trashed() ? 'removido' : 'ativo' }}"
+                                    data-search="{{ strtolower(($u->nome_completo ?? $u->name) . ' ' . $u->email . ' ' . $u->cpf) }}">
                                     <td class="text-center js-col-select d-none">
                                         <input class="form-check-input js-user-check"
-                                            type="checkbox"
-                                            value="{{ $u->id }}"
-                                            data-is-admin="{{ $u->is_admin ? 1 : 0 }}"
-                                            data-name="{{ $u->name }}">
+                                               type="checkbox"
+                                               value="{{ $u->id }}"
+                                               data-is-admin="{{ $u->is_admin ? 1 : 0 }}"
+                                               data-name="{{ $u->name }}"
+                                               @disabled($u->trashed())>
                                     </td>
-                                    <td>{{ $u->name }}</td>
-                                    <td>{{ $u->email }}</td>
-                                    <td>{{ $u->cpf }}</td>
-                                    <td>{{ $u->idosos_count ?? $u->idosos->count() }}</td>
                                     <td>
-                                        @if($u->is_admin)
-                                            <span class="badge bg-danger">Admin</span>
+                                        <div class="fw-semibold">{{ $u->nome_completo ?? $u->name }}</div>
+                                        @if(!empty($u->telefone))
+                                            <small class="text-muted">{{ $u->telefone }}</small>
+                                        @endif
+                                    </td>
+                                    <td class="d-none d-md-table-cell">{{ $u->email }}</td>
+                                    <td class="d-none d-lg-table-cell">{{ $u->cpf }}</td>
+                                    <td class="d-none d-xl-table-cell">{{ $u->idosos_count ?? 0 }}</td>
+                                    <td>
+                                        <div class="d-flex flex-column gap-1">
+                                            @if($u->is_admin)
+                                                <span class="badge bg-danger">Admin</span>
+                                            @else
+                                                <span class="badge bg-success">Tutor</span>
+                                            @endif
+
+                                            @if($u->trashed())
+                                                <span class="badge bg-secondary">Removido</span>
+                                            @else
+                                                <span class="badge bg-primary">Ativo</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="text-end js-actions-col">
+                                        @if($u->trashed())
+                                            <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                                                <form method="POST" action="{{ route('admin.users.restore', $u->id) }}" class="d-inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+                                                    </button>
+                                                </form>
+
+                                                <form method="POST" action="{{ route('admin.users.forceDelete', $u->id) }}" class="d-inline js-force-delete-user-form">
+                                                    @csrf
+                                                    @method('DELETE')
+
+                                                    @if($u->is_admin)
+                                                        <input type="hidden" name="password" value="">
+                                                    @endif
+
+                                                    <button type="submit"
+                                                            class="btn btn-outline-dark btn-sm js-btn-force-delete-user"
+                                                            data-user-name="{{ $u->nome_completo ?? $u->name }}"
+                                                            data-is-admin="{{ $u->is_admin ? 1 : 0 }}">
+                                                        <i class="bi bi-trash3 me-1"></i> Excluir definitivo
+                                                    </button>
+                                                </form>
+                                            </div>
                                         @else
-                                            <span class="badge bg-success">Tutor</span>
+                                            <form method="POST" action="{{ route('admin.users.destroy', $u->id) }}" class="d-inline js-form-remove-user">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                @if($u->is_admin)
+                                                    <input type="hidden" name="password" value="">
+                                                @endif
+
+                                                <button type="submit"
+                                                        class="btn btn-outline-danger btn-sm js-btn-remove-user"
+                                                        data-user-name="{{ $u->nome_completo ?? $u->name }}"
+                                                        data-is-admin="{{ $u->is_admin ? 1 : 0 }}">
+                                                    <i class="bi bi-person-dash me-1"></i> Remover
+                                                </button>
+                                            </form>
                                         @endif
                                     </td>
                                 </tr>
@@ -124,303 +214,375 @@
                         </tbody>
                     </table>
                 </div>
-
             @endif
 
         </div>
     </div>
 </div>
 
+@if($users->isNotEmpty())
 <div class="modal fade" id="modalDeleteUsers" tabindex="-1" aria-hidden="true">
-<div class="modal-dialog">
-    <form id="deleteUsersForm" method="POST" action="{{ route('admin.users.destroyBulk') }}">
-        @csrf
-        @method('DELETE')
+    <div class="modal-dialog">
+        <form method="POST" action="{{ route('admin.users.destroyBulk') }}">
+            @csrf
+            @method('DELETE')
 
-        <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title fw-bold">Apagar usuários</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Remover usuários</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
-        <div class="modal-body">
-            <div class="alert alert-warning mb-2">
-            Você está prestes a apagar <strong><span id="usersCount">0</span></strong> usuário(s).
-            Essa ação não pode ser desfeita.
+                <div class="modal-body">
+                    <div class="alert alert-warning mb-2">
+                        Você está prestes a remover <strong><span id="usersCount">0</span></strong> usuário(s).
+                        Os registros serão retirados da lista ativa e poderão ser restaurados depois.
+                    </div>
+
+                    <div id="adminPasswordWrap" class="mt-3" style="display:none;">
+                        <label class="form-label fw-bold">Confirme sua senha</label>
+                        <input type="password" name="password" class="form-control" autocomplete="current-password">
+                        <div class="form-text">Obrigatório quando houver administrador entre os selecionados.</div>
+                    </div>
+
+                    <div id="usersHiddenInputs"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-person-dash me-1"></i> Remover
+                    </button>
+                </div>
             </div>
-
-            <div id="adminPasswordWrap" class="mt-3" style="display:none;">
-                <label class="form-label fw-bold">Confirme sua senha (obrigatório para apagar administradores)</label>
-                <input type="password" name="password" class="form-control" autocomplete="current-password">
-                <div class="form-text">Senha do usuário logado.</div>
-            </div>
-
-            <div id="usersHiddenInputs"></div>
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-danger">
-            <i class="bi bi-trash me-1"></i> Apagar
-            </button>
-        </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
-</div>
+@endif
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const btnToggle = document.getElementById('btnToggleSelectUser');
-        const btnAll = document.getElementById('btnSelectAllUsers');
-        const btnClear = document.getElementById('btnClearUsers');
-        const btnDelete = document.getElementById('btnDeleteUsers');
+document.addEventListener('DOMContentLoaded', () => {
+    const btnToggle = document.getElementById('btnToggleSelectUser');
+    const btnAll = document.getElementById('btnSelectAllUsers');
+    const btnClear = document.getElementById('btnClearUsers');
+    const btnDelete = document.getElementById('btnDeleteUsers');
 
-        const colSelect = document.querySelectorAll('.js-col-select');
-        const chkAll = document.getElementById('chkAllUsers');
-        const rowsSelect = document.getElementById('rowsPerPageUsers');
-        const pagination = document.getElementById('paginationUsers');
-        const tableInfo = document.getElementById('tableInfoUsers');
+    const colSelect = document.querySelectorAll('.js-col-select');
+    const actionCols = document.querySelectorAll('.js-actions-col');
+    const chkAll = document.getElementById('chkAllUsers');
+    const rowsSelect = document.getElementById('rowsPerPageUsers');
+    const pagination = document.getElementById('paginationUsers');
+    const tableInfo = document.getElementById('tableInfoUsers');
 
-        const searchInput = document.getElementById('searchUsers');
-        const filterType = document.getElementById('filterTypeUsers');
+    const searchInput = document.getElementById('searchUsers');
+    const filterType = document.getElementById('filterTypeUsers');
+    const filterStatus = document.getElementById('filterStatusUsers');
 
-        const modal = document.getElementById('modalDeleteUsers');
-        const countEl = document.getElementById('usersCount');
-        const adminWrap = document.getElementById('adminPasswordWrap');
-        const hiddenWrap = document.getElementById('usersHiddenInputs');
+    const modal = document.getElementById('modalDeleteUsers');
+    const countEl = document.getElementById('usersCount');
+    const adminWrap = document.getElementById('adminPasswordWrap');
+    const hiddenWrap = document.getElementById('usersHiddenInputs');
 
-        const rows = Array.from(document.querySelectorAll('.js-user-row'));
-        const checks = () => Array.from(document.querySelectorAll('.js-user-check'));
+    const rows = Array.from(document.querySelectorAll('.js-user-row'));
+    const checks = () => Array.from(document.querySelectorAll('.js-user-check'));
 
-        let selectMode = false;
-        let currentPage = 1;
-        let rowsPerPage = parseInt(rowsSelect.value, 10);
+    if (!rows.length) return;
 
-        function getFilteredRows() {
-            const search = (searchInput.value || '').trim().toLowerCase();
-            const type = filterType.value;
+    let selectMode = false;
+    let currentPage = 1;
+    let rowsPerPage = parseInt(rowsSelect.value, 10);
 
-            return rows.filter(row => {
-                const rowType = row.dataset.type;
-                const rowSearch = row.dataset.search || '';
+    function getFilteredRows() {
+        const search = (searchInput.value || '').trim().toLowerCase();
+        const type = filterType.value;
+        const status = filterStatus.value;
 
-                const matchesType =
-                    type === 'all' ||
-                    (type === 'admin' && rowType === 'admin') ||
-                    (type === 'tutor' && rowType === 'tutor');
+        return rows.filter(row => {
+            const matchesType = type === 'all' || row.dataset.type === type;
+            const matchesStatus = status === 'all' || row.dataset.status === status;
+            const matchesSearch = search === '' || (row.dataset.search || '').includes(search);
+            return matchesType && matchesStatus && matchesSearch;
+        });
+    }
 
-                const matchesSearch =
-                    search === '' || rowSearch.includes(search);
+    function getPageRows(filteredRows) {
+        const start = (currentPage - 1) * rowsPerPage;
+        return filteredRows.slice(start, start + rowsPerPage);
+    }
 
-                return matchesType && matchesSearch;
-            });
-        }
+    function renderPagination(totalPages) {
+        pagination.innerHTML = '';
+        if (totalPages <= 1) return;
 
-        function getPageRows(filteredRows) {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            return filteredRows.slice(start, end);
-        }
+        const delta = 2;
+        const range = [];
+        const rangeWithDots = [];
+        let last;
 
-        function renderPagination(totalPages) {
-            pagination.innerHTML = '';
-            if (totalPages <= 1) return;
+        function createPageItem(label, page = null, disabled = false, active = false) {
+            const li = document.createElement('li');
+            li.className = 'page-item';
 
-            const items = [];
+            if (disabled) li.classList.add('disabled');
+            if (active) li.classList.add('active');
 
-            if (totalPages <= 7) {
-                for (let i = 1; i <= totalPages; i++) items.push(i);
-            } else if (currentPage <= 3) {
-                items.push(1, 2, 3, '...', totalPages);
-            } else if (currentPage >= totalPages - 2) {
-                items.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+            if (page === null || disabled) {
+                li.innerHTML = `<span class="page-link">${label}</span>`;
             } else {
-                items.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                li.innerHTML = `<button class="page-link" type="button">${label}</button>`;
+                li.addEventListener('click', () => {
+                    currentPage = page;
+                    updateTable();
+                });
             }
 
-            const prev = document.createElement('li');
-            prev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-            prev.innerHTML = `<button class="page-link" type="button">Anterior</button>`;
-            prev.addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updateTable();
-                }
-            });
-            pagination.appendChild(prev);
-
-            items.forEach(item => {
-                const li = document.createElement('li');
-
-                if (item === '...') {
-                    li.className = 'page-item disabled';
-                    li.innerHTML = `<span class="page-link">...</span>`;
-                } else {
-                    li.className = `page-item ${item === currentPage ? 'active' : ''}`;
-                    li.innerHTML = `<button class="page-link" type="button">${item}</button>`;
-                    li.addEventListener('click', () => {
-                        currentPage = item;
-                        updateTable();
-                    });
-                }
-
-                pagination.appendChild(li);
-            });
-
-            const next = document.createElement('li');
-            next.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-            next.innerHTML = `<button class="page-link" type="button">Próxima</button>`;
-            next.addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updateTable();
-                }
-            });
-            pagination.appendChild(next);
+            return li;
         }
 
-        function updateDeleteState() {
-            const selected = checks().filter(c => c.checked);
-            btnDelete.disabled = selected.length === 0;
+        pagination.appendChild(
+            createPageItem('Anterior', currentPage - 1, currentPage === 1)
+        );
 
-            const filteredRows = getFilteredRows();
-            const pageRows = getPageRows(filteredRows);
-
-            const pageChecks = pageRows
-                .map(row => row.querySelector('.js-user-check'))
-                .filter(Boolean);
-
-            if (chkAll) {
-                chkAll.checked = pageChecks.length > 0 && pageChecks.every(c => c.checked);
+        for (let i = 1; i <= totalPages; i++) {
+            if (
+                i === 1 ||
+                i === totalPages ||
+                (i >= currentPage - delta && i <= currentPage + delta)
+            ) {
+                range.push(i);
             }
         }
 
-        function updateTable() {
-            rowsPerPage = parseInt(rowsSelect.value, 10);
+        for (const page of range) {
+            if (last !== undefined) {
+                if (page - last === 2) {
+                    rangeWithDots.push(last + 1);
+                } else if (page - last > 2) {
+                    rangeWithDots.push('...');
+                }
+            }
 
-            const filteredRows = getFilteredRows();
-            const totalRows = filteredRows.length;
-            const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
-
-            if (currentPage > totalPages) currentPage = totalPages;
-
-            rows.forEach(row => row.classList.add('d-none'));
-
-            const pageRows = getPageRows(filteredRows);
-            pageRows.forEach(row => row.classList.remove('d-none'));
-
-            const start = totalRows === 0 ? 0 : ((currentPage - 1) * rowsPerPage) + 1;
-            const end = Math.min(currentPage * rowsPerPage, totalRows);
-
-            tableInfo.textContent = `Mostrando ${start} até ${end} de ${totalRows} registros`;
-            renderPagination(totalPages);
-            updateDeleteState();
+            rangeWithDots.push(page);
+            last = page;
         }
 
-        function setSelectMode(on) {
-            selectMode = on;
-
-            colSelect.forEach(el => el.classList.toggle('d-none', !on));
-            btnAll.classList.toggle('d-none', !on);
-            btnClear.classList.toggle('d-none', !on);
-            btnDelete.classList.toggle('d-none', !on);
-
-            btnToggle.classList.toggle('btn-outline-primary', !on);
-            btnToggle.classList.toggle('btn-primary', on);
-
-            btnToggle.innerHTML = on
-                ? '<i class="bi bi-x-lg me-1"></i> Cancelar seleção'
-                : '<i class="bi bi-check2-square me-1"></i> Selecionar';
-
-            if (!on) {
-                checks().forEach(c => c.checked = false);
-                if (chkAll) chkAll.checked = false;
-                btnDelete.disabled = true;
+        rangeWithDots.forEach(page => {
+            if (page === '...') {
+                pagination.appendChild(createPageItem('...', null, true));
             } else {
-                updateDeleteState();
+                pagination.appendChild(
+                    createPageItem(String(page), page, false, page === currentPage)
+                );
             }
-        }
-
-        btnToggle?.addEventListener('click', () => setSelectMode(!selectMode));
-
-        btnAll?.addEventListener('click', () => {
-            const filteredRows = getFilteredRows();
-            const pageRows = getPageRows(filteredRows);
-
-            pageRows.forEach(row => {
-                const check = row.querySelector('.js-user-check');
-                if (check) check.checked = true;
-            });
-
-            updateDeleteState();
         });
 
-        btnClear?.addEventListener('click', () => {
+        pagination.appendChild(
+            createPageItem('Próximo', currentPage + 1, currentPage === totalPages)
+        );
+    }
+
+    function updateDeleteState() {
+        const selected = checks().filter(c => c.checked && !c.disabled);
+        btnDelete.disabled = selected.length === 0;
+
+        const pageChecks = getPageRows(getFilteredRows())
+            .map(row => row.querySelector('.js-user-check'))
+            .filter(check => check && !check.disabled);
+
+        if (chkAll) {
+            chkAll.checked = pageChecks.length > 0 && pageChecks.every(c => c.checked);
+            chkAll.indeterminate = pageChecks.some(c => c.checked) && !pageChecks.every(c => c.checked);
+        }
+    }
+
+    function updateTable() {
+        rowsPerPage = parseInt(rowsSelect.value, 10);
+
+        const filteredRows = getFilteredRows();
+        const totalRows = filteredRows.length;
+        const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        rows.forEach(row => row.classList.add('d-none'));
+
+        const pageRows = getPageRows(filteredRows);
+        pageRows.forEach(row => row.classList.remove('d-none'));
+
+        const start = totalRows === 0 ? 0 : ((currentPage - 1) * rowsPerPage) + 1;
+        const end = Math.min(currentPage * rowsPerPage, totalRows);
+
+        tableInfo.textContent = `Mostrando ${start} até ${end} de ${totalRows} registros`;
+        renderPagination(totalPages);
+        updateDeleteState();
+    }
+
+    function setSelectMode(on) {
+        selectMode = on;
+
+        colSelect.forEach(el => el.classList.toggle('d-none', !on));
+        actionCols.forEach(el => el.classList.toggle('d-none', on));
+        btnAll.classList.toggle('d-none', !on);
+        btnClear.classList.toggle('d-none', !on);
+        btnDelete.classList.toggle('d-none', !on);
+
+        btnToggle.classList.toggle('btn-outline-primary', !on);
+        btnToggle.classList.toggle('btn-primary', on);
+        btnToggle.innerHTML = on
+            ? '<i class="bi bi-x-lg me-1"></i> Cancelar seleção'
+            : '<i class="bi bi-check2-square me-1"></i> Selecionar';
+
+        if (!on) {
             checks().forEach(c => c.checked = false);
-            if (chkAll) chkAll.checked = false;
-            updateDeleteState();
-        });
-
-        chkAll?.addEventListener('change', () => {
-            const filteredRows = getFilteredRows();
-            const pageRows = getPageRows(filteredRows);
-
-            pageRows.forEach(row => {
-                const check = row.querySelector('.js-user-check');
-                if (check) check.checked = chkAll.checked;
-            });
-
-            updateDeleteState();
-        });
-
-        rowsSelect?.addEventListener('change', () => {
-            currentPage = 1;
-            updateTable();
-        });
-
-        searchInput?.addEventListener('input', () => {
-            currentPage = 1;
-            updateTable();
-        });
-
-        filterType?.addEventListener('change', () => {
-            currentPage = 1;
-            updateTable();
-        });
-
-        document.addEventListener('change', (e) => {
-            if (e.target.classList?.contains('js-user-check')) {
-                updateDeleteState();
+            if (chkAll) {
+                chkAll.checked = false;
+                chkAll.indeterminate = false;
             }
+            btnDelete.disabled = true;
+        } else {
+            updateDeleteState();
+        }
+    }
+
+    btnToggle?.addEventListener('click', () => setSelectMode(!selectMode));
+
+    btnAll?.addEventListener('click', () => {
+        getPageRows(getFilteredRows()).forEach(row => {
+            const check = row.querySelector('.js-user-check');
+            if (check && !check.disabled) check.checked = true;
         });
+        updateDeleteState();
+    });
 
-        modal?.addEventListener('show.bs.modal', () => {
-            const selected = checks().filter(c => c.checked);
+    btnClear?.addEventListener('click', () => {
+        checks().forEach(c => c.checked = false);
+        if (chkAll) {
+            chkAll.checked = false;
+            chkAll.indeterminate = false;
+        }
+        updateDeleteState();
+    });
 
-            countEl.textContent = String(selected.length);
-
-            hiddenWrap.innerHTML = '';
-            selected.forEach(c => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'ids[]';
-                input.value = c.value;
-                hiddenWrap.appendChild(input);
-            });
-
-            const hasAdmin = selected.some(c => c.dataset.isAdmin === '1');
-            adminWrap.style.display = hasAdmin ? '' : 'none';
-
-            const pwd = adminWrap.querySelector('input[name="password"]');
-            if (pwd) pwd.value = '';
+    chkAll?.addEventListener('change', () => {
+        getPageRows(getFilteredRows()).forEach(row => {
+            const check = row.querySelector('.js-user-check');
+            if (check && !check.disabled) check.checked = chkAll.checked;
         });
+        updateDeleteState();
+    });
 
-        setSelectMode(false);
+    rowsSelect?.addEventListener('change', () => {
+        currentPage = 1;
         updateTable();
     });
+
+    searchInput?.addEventListener('input', () => {
+        currentPage = 1;
+        updateTable();
+    });
+
+    filterType?.addEventListener('change', () => {
+        currentPage = 1;
+        updateTable();
+    });
+
+    filterStatus?.addEventListener('change', () => {
+        currentPage = 1;
+        updateTable();
+    });
+
+    document.addEventListener('change', (e) => {
+        if (e.target.classList?.contains('js-user-check')) {
+            updateDeleteState();
+        }
+    });
+
+    modal?.addEventListener('show.bs.modal', () => {
+        const selected = checks().filter(c => c.checked && !c.disabled);
+
+        countEl.textContent = String(selected.length);
+        hiddenWrap.innerHTML = '';
+
+        selected.forEach(c => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = c.value;
+            hiddenWrap.appendChild(input);
+        });
+
+        const hasAdmin = selected.some(c => c.dataset.isAdmin === '1');
+        adminWrap.style.display = hasAdmin ? '' : 'none';
+
+        const pwd = adminWrap.querySelector('input[name="password"]');
+        if (pwd) pwd.value = '';
+    });
+
+    document.querySelectorAll('.js-btn-remove-user').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const isAdmin = button.dataset.isAdmin === '1';
+
+            if (!isAdmin) {
+                const ok = confirm('Deseja remover este usuário da lista ativa? Ele poderá ser restaurado depois.');
+                if (!ok) e.preventDefault();
+                return;
+            }
+
+            e.preventDefault();
+
+            const senha = prompt('Para remover um administrador, confirme sua senha:');
+            if (senha === null || senha.trim() === '') {
+                return;
+            }
+
+            const form = button.closest('form');
+            const hiddenPassword = form.querySelector('input[name="password"]');
+
+            if (hiddenPassword) {
+                hiddenPassword.value = senha;
+            }
+
+            form.submit();
+        });
+    });
+
+    document.querySelectorAll('.js-btn-force-delete-user').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const isAdmin = button.dataset.isAdmin === '1';
+            const userName = button.dataset.userName || 'este usuário';
+
+            const confirmacao = confirm(`Deseja excluir definitivamente ${userName}? Essa ação não poderá ser desfeita.`);
+            if (!confirmacao) {
+                e.preventDefault();
+                return;
+            }
+
+            if (!isAdmin) {
+                return;
+            }
+
+            e.preventDefault();
+
+            const senha = prompt('Para excluir definitivamente um administrador, confirme sua senha:');
+            if (senha === null || senha.trim() === '') {
+                return;
+            }
+
+            const form = button.closest('form');
+            const hiddenPassword = form.querySelector('input[name="password"]');
+
+            if (hiddenPassword) {
+                hiddenPassword.value = senha;
+            }
+
+            form.submit();
+        });
+    });
+
+    setSelectMode(false);
+    updateTable();
+});
 </script>
 @endpush
-
 @endsection

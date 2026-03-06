@@ -16,12 +16,19 @@ class Medicamento extends Model
         'horario',
         'frequencia',
         'observacoes',
+        'data_inicio',
+        'data_fim',
+        'ativo',
         'tomado',
     ];
 
     protected function casts(): array
     {
         return [
+            'horario' => 'datetime:H:i',
+            'data_inicio' => 'date',
+            'data_fim' => 'date',
+            'ativo' => 'boolean',
             'tomado' => 'boolean',
         ];
     }

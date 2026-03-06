@@ -8,9 +8,21 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
+    private function onlyDigits(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D/', '', $value);
+
+        return $digits !== '' ? $digits : null;
+    }
+
     public function index()
     {
         $totalUsers   = User::count();
@@ -18,18 +30,25 @@ class AdminController extends Controller
         $totalAdmins  = User::where('is_admin', true)->count();
         $totalTutores = User::where('is_admin', false)->count();
 
-        $idososComTutor  = Idoso::has('users')->count();
-        $idososSemTutor  = Idoso::doesntHave('users')->count();
+        $idososComTutor = Idoso::has('users')->count();
+        $idososSemTutor = Idoso::doesntHave('users')->count();
 
-        $ultimosUsuarios = User::orderBy('is_admin', 'desc')
-            ->orderBy('created_at', 'desc')
+        $ultimosUsuarios = User::withTrashed()
+            ->withCount('idosos')
+            ->orderByRaw('deleted_at IS NOT NULL')
+            ->orderBy('is_admin', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
-        $ultimosIdosos = Idoso::with('users')
-            ->orderBy('created_at', 'desc')
+        $ultimosIdosos = Idoso::withTrashed()
+            ->with('users')
+            ->orderByRaw('deleted_at IS NOT NULL')
+            ->orderByDesc('created_at')
             ->get();
 
-        $dias = collect(range(13, 0))->map(fn($i) => Carbon::today()->subDays($i)->format('Y-m-d'));
+        $dias = collect(range(13, 0))->map(
+            fn ($i) => Carbon::today()->subDays($i)->format('Y-m-d')
+        );
 
         $usersRaw = User::selectRaw('DATE(created_at) as dia, COUNT(*) as total')
             ->where('created_at', '>=', Carbon::today()->subDays(13)->startOfDay())
@@ -43,10 +62,9 @@ class AdminController extends Controller
             ->orderBy('dia')
             ->pluck('total', 'dia');
 
-        $usersByDay = $dias->map(fn($d) => (int) ($usersRaw[$d] ?? 0))->values();
-        $idososByDay = $dias->map(fn($d) => (int) ($idososRaw[$d] ?? 0))->values();
-
-        $labels = $dias->map(fn($d) => Carbon::parse($d)->format('d/m'))->values();
+        $usersByDay = $dias->map(fn ($d) => (int) ($usersRaw[$d] ?? 0))->values();
+        $idososByDay = $dias->map(fn ($d) => (int) ($idososRaw[$d] ?? 0))->values();
+        $labels = $dias->map(fn ($d) => Carbon::parse($d)->format('d/m'))->values();
 
         return view('admin.dashboard', compact(
             'totalUsers',
@@ -65,10 +83,11 @@ class AdminController extends Controller
 
     public function users()
     {
-        // Melhor: withCount para não ficar contando relação no blade
-        $users = User::withCount('idosos')
+        $users = User::withTrashed()
+            ->withCount('idosos')
+            ->orderByRaw('deleted_at IS NOT NULL')
             ->orderBy('is_admin', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
         return view('admin.users', compact('users'));
@@ -76,43 +95,43 @@ class AdminController extends Controller
 
     public function idosos()
     {
-        $idosos = Idoso::with('users')
-            ->orderBy('created_at', 'desc')
+        $idosos = Idoso::withTrashed()
+            ->with('users')
+            ->orderByRaw('deleted_at IS NOT NULL')
+            ->orderByDesc('created_at')
             ->get();
 
         return view('admin.idosos', compact('idosos'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE USER (com senha se alvo for admin)
-    |--------------------------------------------------------------------------
-    */
     public function destroyUser(Request $request, User $user)
     {
-        // Se alvo é ADMIN, exige senha do usuário logado
+        if ($user->trashed()) {
+            return back()->with('error', 'Este usuário já está removido.');
+        }
+
         if ($user->is_admin) {
             $request->validate([
                 'password' => ['required', 'string'],
             ], [
-                'password.required' => 'Informe sua senha para apagar um administrador.',
+                'password.required' => 'Informe sua senha para remover um administrador.',
             ]);
 
             if (!Hash::check($request->password, Auth::user()->password)) {
                 return back()->with('error', 'Senha incorreta.');
             }
+
+            $totalAdminsAtivos = User::where('is_admin', true)->count();
+
+            if ($totalAdminsAtivos <= 1) {
+                return back()->with('error', 'Não é possível remover o último administrador.');
+            }
         }
 
         $isSelf = $user->id === Auth::id();
 
-        // (Opcional, recomendado) impedir apagar o último admin:
-        // if ($user->is_admin && User::where('is_admin', true)->count() <= 1) {
-        //     return back()->with('error', 'Não é possível apagar o último administrador.');
-        // }
-
         $user->delete();
 
-        // Se apagou o próprio usuário, derruba sessão
         if ($isSelf) {
             Auth::logout();
             $request->session()->invalidate();
@@ -124,16 +143,87 @@ class AdminController extends Controller
         return back()->with('success', 'Usuário removido com sucesso.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE IDOSO
-    |--------------------------------------------------------------------------
-    */
+    public function restoreUser($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+
+        if (!$user->trashed()) {
+            return back()->with('error', 'Este usuário já está ativo.');
+        }
+
+        $user->restore();
+
+        return back()->with('success', 'Usuário restaurado com sucesso.');
+    }
+
+    public function forceDeleteUser(Request $request, $id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+
+        if (!$user->trashed()) {
+            return back()->with('error', 'Só é possível excluir definitivamente usuários já removidos.');
+        }
+
+        if ($user->is_admin) {
+            $request->validate([
+                'password' => ['required', 'string'],
+            ], [
+                'password.required' => 'Informe sua senha para excluir definitivamente um administrador.',
+            ]);
+
+            if (!Hash::check($request->password, Auth::user()->password)) {
+                return back()->with('error', 'Senha incorreta.');
+            }
+
+            $totalAdminsRemanescentes = User::where('is_admin', true)
+                ->whereNull('deleted_at')
+                ->count();
+
+            if ($totalAdminsRemanescentes <= 0) {
+                return back()->with('error', 'Não é possível excluir definitivamente este administrador nessa condição.');
+            }
+        }
+
+        $user->forceDelete();
+
+        return back()->with('success', 'Usuário excluído definitivamente com sucesso.');
+    }
+
     public function destroyIdoso(Request $request, Idoso $idoso)
     {
-        $idoso->delete(); // depende do cascade no banco
+        if ($idoso->trashed()) {
+            return back()->with('error', 'Este cadastro já está removido.');
+        }
+
+        $idoso->delete();
 
         return back()->with('success', 'Cadastro removido com sucesso.');
+    }
+
+    public function restoreIdoso($id)
+    {
+        $idoso = Idoso::withTrashed()->findOrFail($id);
+
+        if (!$idoso->trashed()) {
+            return back()->with('error', 'Este cadastro já está ativo.');
+        }
+
+        $idoso->restore();
+
+        return back()->with('success', 'Cadastro restaurado com sucesso.');
+    }
+
+    public function forceDeleteIdoso($id)
+    {
+        $idoso = Idoso::withTrashed()->findOrFail($id);
+
+        if (!$idoso->trashed()) {
+            return back()->with('error', 'Só é possível excluir definitivamente cadastros já removidos.');
+        }
+
+        $idoso->forceDelete();
+
+        return back()->with('success', 'Cadastro excluído definitivamente com sucesso.');
     }
 
     public function destroyUsersBulk(Request $request)
@@ -144,38 +234,43 @@ class AdminController extends Controller
             return back()->with('error', 'Selecione pelo menos 1 usuário.');
         }
 
-        $users = User::whereIn('id', $ids)->get();
+        $users = User::withTrashed()->whereIn('id', $ids)->get();
+        $usersAtivos = $users->filter(fn ($u) => !$u->trashed());
 
-        // Se qualquer selecionado for admin, exige senha do logado
-        $temAdminSelecionado = $users->contains(fn($u) => (bool) $u->is_admin);
+        if ($usersAtivos->isEmpty()) {
+            return back()->with('error', 'Nenhum usuário ativo foi selecionado.');
+        }
+
+        $temAdminSelecionado = $usersAtivos->contains(fn ($u) => (bool) $u->is_admin);
 
         if ($temAdminSelecionado) {
             $request->validate([
                 'password' => ['required', 'string'],
             ], [
-                'password.required' => 'Informe sua senha para apagar administradores.',
+                'password.required' => 'Informe sua senha para remover administradores.',
             ]);
 
             if (!Hash::check($request->password, Auth::user()->password)) {
                 return back()->with('error', 'Senha incorreta.');
             }
+
+            $adminsSelecionados = $usersAtivos->where('is_admin', true)->count();
+            $totalAdminsAtivos = User::where('is_admin', true)->count();
+
+            if (($totalAdminsAtivos - $adminsSelecionados) <= 0) {
+                return back()->with('error', 'Não é possível remover o último administrador.');
+            }
         }
 
-        $isSelf = $users->contains(fn($u) => $u->id === Auth::id());
+        $isSelf = $usersAtivos->contains(fn ($u) => $u->id === Auth::id());
 
-        // (Opcional recomendado) impedir apagar o último admin:
-        // $adminsSelecionados = $users->where('is_admin', true)->count();
-        // $totalAdmins = User::where('is_admin', true)->count();
-        // if ($adminsSelecionados > 0 && ($totalAdmins - $adminsSelecionados) <= 0) {
-        //     return back()->with('error', 'Não é possível apagar o último administrador.');
-        // }
-
-        User::whereIn('id', $users->pluck('id'))->delete();
+        User::whereIn('id', $usersAtivos->pluck('id'))->delete();
 
         if ($isSelf) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
             return redirect()->route('login')->with('success', 'Seu usuário foi removido.');
         }
 
@@ -190,7 +285,15 @@ class AdminController extends Controller
             return back()->with('error', 'Selecione pelo menos 1 cadastro.');
         }
 
-        Idoso::whereIn('id', $ids)->delete(); // depende dos cascades
+        $idosos = Idoso::withTrashed()->whereIn('id', $ids)->get();
+        $idososAtivos = $idosos->filter(fn ($i) => !$i->trashed());
+
+        if ($idososAtivos->isEmpty()) {
+            return back()->with('error', 'Nenhum cadastro ativo foi selecionado.');
+        }
+
+        Idoso::whereIn('id', $idososAtivos->pluck('id'))->delete();
+
         return back()->with('success', 'Cadastro(s) removido(s) com sucesso.');
     }
 
@@ -201,27 +304,69 @@ class AdminController extends Controller
 
     public function storeUser(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'cpf' => 'required|string|max:14|unique:users,cpf',
-            'password' => 'required|string|min:8|confirmed',
+        $cpf = $this->onlyDigits($request->cpf);
+        $email = $request->email;
 
-            // agora é obrigatório e só pode ser 0 ou 1
-            'is_admin' => 'required|in:0,1',
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'sobrenome' => ['nullable', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->whereNull('deleted_at'),
+            ],
+            'cpf' => ['required', 'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/'],
+            'telefone' => ['required', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'data_nascimento' => ['nullable', 'date'],
+            'cep' => ['nullable', 'regex:/^\d{5}\-\d{3}$/'],
+            'logradouro' => ['nullable', 'string', 'max:255'],
+            'numero' => ['nullable', 'string', 'max:20'],
+            'bairro' => ['nullable', 'string', 'max:255'],
+            'cidade' => ['nullable', 'string', 'max:255'],
+            'estado' => ['nullable', 'string', 'size:2'],
+            'complemento' => ['nullable', 'string', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'is_admin' => ['required', 'in:0,1'],
         ], [
-            'password.confirmed' => 'A confirmação da senha não confere.',
-            'email.unique' => 'Esse email já está em uso.',
-            'cpf.unique' => 'Esse CPF já está em uso.',
+            'cpf.regex' => 'Informe um CPF válido no formato 000.000.000-00.',
+            'telefone.regex' => 'Informe um telefone válido no formato (00) 00000-0000.',
+            'cep.regex' => 'Informe um CEP válido no formato 00000-000.',
         ]);
+
+        if (User::withTrashed()->where('cpf', $cpf)->whereNull('deleted_at')->exists()) {
+            return back()
+                ->withErrors(['cpf' => 'Este CPF já está em uso por um usuário ativo.'])
+                ->withInput();
+        }
+
+        if (User::onlyTrashed()->where('email', $email)->exists()) {
+            return back()
+                ->withErrors(['email' => 'Já existe um usuário removido com este e-mail. Restaure o cadastro existente ou use outro e-mail.'])
+                ->withInput();
+        }
+
+        if (User::onlyTrashed()->where('cpf', $cpf)->exists()) {
+            return back()
+                ->withErrors(['cpf' => 'Já existe um usuário removido com este CPF. Restaure o cadastro existente ou use outro CPF.'])
+                ->withInput();
+        }
 
         User::create([
             'name' => $request->name,
-            'email' => $request->email,
-            'cpf' => $request->cpf,
+            'sobrenome' => $request->sobrenome,
+            'email' => $email,
+            'cpf' => $cpf,
+            'telefone' => $this->onlyDigits($request->telefone),
+            'data_nascimento' => $request->data_nascimento,
+            'cep' => $this->onlyDigits($request->cep),
+            'logradouro' => $request->logradouro,
+            'numero' => $request->numero,
+            'bairro' => $request->bairro,
+            'cidade' => $request->cidade,
+            'estado' => $request->estado ? strtoupper($request->estado) : null,
+            'complemento' => $request->complemento,
             'password' => Hash::make($request->password),
-
-            // sempre salva 0 ou 1
             'is_admin' => $request->boolean('is_admin'),
         ]);
 
@@ -236,34 +381,38 @@ class AdminController extends Controller
 
     public function storeIdoso(Request $request)
     {
+        $cpf = $this->onlyDigits($request->cpf);
+
         $request->validate([
-            'nome' => 'required|string|max:255',
-            'data_nascimento' => 'required|date',
-            'sexo' => 'required|in:Masculino,Feminino,Outro',
+            'nome' => ['required', 'string', 'max:255'],
+            'data_nascimento' => ['required', 'date'],
+            'sexo' => ['nullable', 'in:Masculino,Feminino,Outro'],
             'cpf' => ['required', 'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/'],
             'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
-            'observacoes' => 'nullable|string|max:2000',
+            'observacoes' => ['nullable', 'string', 'max:2000'],
         ], [
-            'nome.required' => 'Informe o nome.',
-            'data_nascimento.required' => 'Informe a data de nascimento.',
-            'data_nascimento.date' => 'Informe uma data válida.',
-
-            'sexo.required' => 'Selecione o sexo.',
-            'sexo.in' => 'Selecione uma opção válida para o sexo.',
-
-            'cpf.required' => 'Informe o CPF.',
-            'cpf.regex' => 'Informe o CPF no formato 000.000.000-00.',
-
-            'telefone.required' => 'Informe o telefone.',
-            'telefone.regex' => 'Informe o telefone no formato (00) 00000-0000.',        
+            'cpf.regex' => 'Informe um CPF válido no formato 000.000.000-00.',
+            'telefone.regex' => 'Informe um telefone válido no formato (00) 00000-0000.',
         ]);
+
+        if (Idoso::withTrashed()->where('cpf', $cpf)->whereNull('deleted_at')->exists()) {
+            return back()
+                ->withErrors(['cpf' => 'Este CPF já está em uso por um cadastro ativo.'])
+                ->withInput();
+        }
+
+        if (Idoso::onlyTrashed()->where('cpf', $cpf)->exists()) {
+            return back()
+                ->withErrors(['cpf' => 'Já existe um cadastro removido com este CPF. Restaure o cadastro existente ou use outro CPF.'])
+                ->withInput();
+        }
 
         Idoso::create([
             'nome' => $request->nome,
             'data_nascimento' => $request->data_nascimento,
             'sexo' => $request->sexo,
-            'cpf' => preg_replace('/\D/', '', $request->cpf),
-            'telefone' => $request->telefone ? preg_replace('/\D/', '', $request->telefone) : null,
+            'cpf' => $cpf,
+            'telefone' => $this->onlyDigits($request->telefone),
             'observacoes' => $request->observacoes,
         ]);
 

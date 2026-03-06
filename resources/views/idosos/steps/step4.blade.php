@@ -9,7 +9,7 @@
         <div>
             <h4 class="fw-bold mb-1">Contatos de referência</h4>
             <div class="text-muted small">
-                Pelo menos 1 contato é obrigatório (quem deve ser avisado primeiro).
+                Pelo menos 1 contato é obrigatório para concluir o cadastro.
             </div>
         </div>
 
@@ -31,7 +31,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger d-flex align-items-start gap-2">
+        <div class="alert alert-danger d-flex align-items-start gap-2 rounded-4">
             <i class="bi bi-exclamation-triangle mt-1"></i>
             <div>
                 <strong>Ops!</strong> Revise os campos dos contatos.
@@ -46,114 +46,86 @@
                 @csrf
 
                 <div id="contatos-wrapper">
-
-                    {{-- Contato Principal --}}
-                    <div class="contato-item border rounded-4 p-3 mb-3 bg-light">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="fw-bold">
-                                Contato principal <span class="badge bg-warning text-dark ms-2">Obrigatório</span>
-                            </div>
-                            <div class="text-muted small">Avisado primeiro</div>
-                        </div>
-
-                        <div class="row g-3">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">Nome *</label>
-                                <input type="text"
-                                    name="contatos[0][nome]"
-                                    value="{{ old('contatos.0.nome', $contatos[0]->nome ?? '') }}"
-                                    class="form-control @error('contatos.0.nome') is-invalid @enderror"
-                                    placeholder="Ex.: João da Silva"
-                                    required>
-                                @error('contatos.0.nome')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold">Telefone *</label>
-                                <input type="text"
-                                    name="contatos[0][telefone]"
-                                    value="{{ old('contatos.0.telefone', $contatos[0]->telefone ?? '') }}"
-                                    class="form-control telefone @error('contatos.0.telefone') is-invalid @enderror"
-                                    placeholder="(00) 00000-0000"
-                                    inputmode="numeric"
-                                    required>
-                                @error('contatos.0.telefone')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Parentesco (opcional)</label>
-                                <input type="text"
-                                    name="contatos[0][parentesco]"
-                                    value="{{ old('contatos.0.parentesco', $contatos[0]->parentesco ?? '') }}"
-                                    class="form-control"
-                                    placeholder="Ex.: Filho, Filha, Cuidador, Irmão...">
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Contatos extras existentes (se voltar com old) --}}
                     @php
-                        $oldContatos = old('contatos');
-                        $startIndex = 1;
-                        if (is_array($oldContatos) && count($oldContatos) > 1) {
-                            $startIndex = count($oldContatos);
-                        }
+                        $contatosOld = old('contatos');
+                        $contatosBase = is_array($contatosOld)
+                            ? $contatosOld
+                            : (($contatos ?? collect())->count() ? $contatos->map(fn($c) => [
+                                'nome' => $c->nome,
+                                'telefone' => $c->telefone,
+                                'parentesco' => $c->parentesco,
+                            ])->toArray() : [[
+                                'nome' => '',
+                                'telefone' => '',
+                                'parentesco' => '',
+                            ]]);
                     @endphp
 
-                    @if(is_array($oldContatos) && count($oldContatos) > 1)
-                        @foreach($oldContatos as $i => $c)
-                            @continue($i === 0)
-                            <div class="contato-item border rounded-4 p-3 mb-3 position-relative">
+                    @foreach($contatosBase as $i => $c)
+                        <div class="contato-item border rounded-4 p-3 mb-3 {{ $i === 0 ? 'bg-light' : 'position-relative' }}">
+                            @if($i > 0)
                                 <button type="button"
-                                        class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
-                                        onclick="removerContato(this)">
+                                        class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 btn-remove-contato">
                                     <i class="bi bi-x-lg"></i>
                                 </button>
+                            @endif
 
-                                <div class="fw-bold mb-2">Contato adicional</div>
-
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">Nome *</label>
-                                        <input type="text"
-                                            name="contatos[{{ $i }}][nome]"
-                                            value="{{ $c['nome'] ?? '' }}"
-                                            class="form-control"
-                                            required>
-                                    </div>
-
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">Telefone *</label>
-                                        <input type="text"
-                                            name="contatos[{{ $i }}][telefone]"
-                                            value="{{ $c['telefone'] ?? '' }}"
-                                            class="form-control telefone"
-                                            inputmode="numeric"
-                                            required>
-                                    </div>
-
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold">Parentesco (opcional)</label>
-                                        <input type="text"
-                                            name="contatos[{{ $i }}][parentesco]"
-                                            value="{{ $c['parentesco'] ?? '' }}"
-                                            class="form-control">
-                                    </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                <div class="fw-bold contato-title">
+                                    @if($i === 0)
+                                        Contato principal <span class="badge bg-warning text-dark ms-2">Obrigatório</span>
+                                    @else
+                                        
+                                    @endif
+                                </div>
+                                <div class="text-muted small">
+                                    {{ $i === 0 ? 'Avisado primeiro' : '' }}
                                 </div>
                             </div>
-                        @endforeach
-                    @endif
 
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-semibold">Nome *</label>
+                                    <input type="text"
+                                        name="contatos[{{ $i }}][nome]"
+                                        value="{{ $c['nome'] ?? '' }}"
+                                        class="form-control @error('contatos.'.$i.'.nome') is-invalid @enderror"
+                                        placeholder="Ex.: João da Silva"
+                                        required>
+                                    @error('contatos.'.$i.'.nome')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label fw-semibold">Telefone *</label>
+                                    <input type="text"
+                                        name="contatos[{{ $i }}][telefone]"
+                                        value="{{ $c['telefone'] ?? '' }}"
+                                        class="form-control telefone @error('contatos.'.$i.'.telefone') is-invalid @enderror"
+                                        placeholder="(00) 00000-0000"
+                                        inputmode="numeric"
+                                        required>
+                                    @error('contatos.'.$i.'.telefone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Parentesco (opcional)</label>
+                                    <input type="text"
+                                        name="contatos[{{ $i }}][parentesco]"
+                                        value="{{ $c['parentesco'] ?? '' }}"
+                                        class="form-control"
+                                        placeholder="Ex.: Filho, Filha, Cuidador, Irmão...">
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2">
-                    <button type="button"
-                            class="btn btn-outline-primary"
-                            onclick="adicionarContato()">
+                    <button type="button" class="btn btn-outline-primary rounded-3" id="btn-add-contato">
                         <i class="bi bi-person-plus me-1"></i> Adicionar outro contato
                     </button>
 
@@ -166,11 +138,11 @@
 
                 <div class="d-flex justify-content-between gap-2 flex-wrap">
                     <a href="{{ route('idosos.create.step3', $idoso->id) }}"
-                    class="btn btn-outline-secondary px-4">
+                    class="btn btn-outline-secondary px-4 rounded-3">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
 
-                    <button type="submit" class="btn btn-primary px-4">
+                    <button type="submit" class="btn btn-primary px-4 rounded-3">
                         Finalizar cadastro <i class="bi bi-check2-circle ms-1"></i>
                     </button>
                 </div>
@@ -184,7 +156,8 @@
 @push('scripts')
 <script>
 (function(){
-    let index = {{ $startIndex ?? 1 }};
+    const wrapper = document.getElementById('contatos-wrapper');
+    const btnAdd = document.getElementById('btn-add-contato');
 
     const onlyDigits = (v) => (v || "").replace(/\D/g,'');
     function maskPhone(v){
@@ -200,23 +173,66 @@
     function applyPhoneMask(container){
         const inputs = container.querySelectorAll('.telefone');
         inputs.forEach(inp => {
-            inp.addEventListener('input', () => inp.value = maskPhone(inp.value));
+            inp.removeEventListener('input', inp._maskHandler || (() => {}));
+            const handler = () => inp.value = maskPhone(inp.value);
+            inp._maskHandler = handler;
+            inp.addEventListener('input', handler);
             inp.value = maskPhone(inp.value);
         });
     }
 
-    window.adicionarContato = function(){
-        const wrapper = document.getElementById('contatos-wrapper');
+    function reindexContatos() {
+        const items = wrapper.querySelectorAll('.contato-item');
+
+        items.forEach((item, index) => {
+            item.querySelectorAll('input').forEach(input => {
+                input.name = input.name.replace(/contatos\[\d+\]/, `contatos[${index}]`);
+            });
+
+            const title = item.querySelector('.contato-title');
+            const hint = item.querySelector('.text-muted.small');
+
+            if (index === 0) {
+                item.classList.add('bg-light');
+                item.classList.remove('position-relative');
+                title.innerHTML = 'Contato principal <span class="badge bg-warning text-dark ms-2">Obrigatório</span>';
+                if (hint) hint.textContent = 'Avisado primeiro';
+            } else {
+                item.classList.remove('bg-light');
+                item.classList.add('position-relative');
+                title.innerHTML = 'Contato adicional';
+                if (hint) hint.textContent = '';
+            }
+
+            let removeBtn = item.querySelector('.btn-remove-contato');
+            if (index === 0) {
+                if (removeBtn) removeBtn.remove();
+            } else if (!removeBtn) {
+                removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 btn-remove-contato';
+                removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+                item.prepend(removeBtn);
+            }
+        });
+
+        applyPhoneMask(wrapper);
+    }
+
+    btnAdd?.addEventListener('click', () => {
+        const index = wrapper.querySelectorAll('.contato-item').length;
 
         const html = `
             <div class="contato-item border rounded-4 p-3 mb-3 position-relative">
                 <button type="button"
-                        class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
-                        onclick="removerContato(this)">
+                        class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 btn-remove-contato">
                     <i class="bi bi-x-lg"></i>
                 </button>
 
-                <div class="fw-bold mb-2">Contato adicional</div>
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <div class="fw-bold contato-title">Contato adicional</div>
+                    <div class="text-muted small"></div>
+                </div>
 
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
@@ -250,17 +266,23 @@
         `;
 
         wrapper.insertAdjacentHTML('beforeend', html);
-        const last = wrapper.lastElementChild;
-        applyPhoneMask(last);
+        reindexContatos();
+    });
 
-        index++;
-    };
+    wrapper?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-remove-contato');
+        if (!btn) return;
 
-    window.removerContato = function(botao){
-        botao.closest('.contato-item')?.remove();
-    };
+        const items = wrapper.querySelectorAll('.contato-item');
+        if (items.length <= 1) {
+            alert('É obrigatório manter pelo menos 1 contato.');
+            return;
+        }
 
-    // aplica máscara nos existentes
+        btn.closest('.contato-item')?.remove();
+        reindexContatos();
+    });
+
     applyPhoneMask(document);
 })();
 </script>

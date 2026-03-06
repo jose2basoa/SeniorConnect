@@ -6,30 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('enderecos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idoso_id')->constrained()->onDelete('cascade');
 
-            $table->string('cep')->nullable();
-            $table->string('rua')->nullable();
-            $table->string('numero')->nullable();
+            $table->foreignId('idoso_id')
+                ->constrained('idosos')
+                ->cascadeOnDelete();
+
+            $table->string('cep', 8)->nullable();
+            $table->string('logradouro')->nullable();
+            $table->string('numero', 20)->nullable();
             $table->string('complemento')->nullable();
             $table->string('bairro')->nullable();
             $table->string('cidade')->nullable();
-            $table->string('estado')->nullable();
+            $table->char('estado', 2)->nullable();
 
             $table->timestamps();
+
+            $table->unique('idoso_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('enderecos');

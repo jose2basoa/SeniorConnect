@@ -10,19 +10,19 @@
             <small class="text-muted">Atualize seus dados de acesso e informações pessoais.</small>
         </div>
 
-        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar ao painel
+        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary rounded-3">
+            <i class="bi bi-arrow-left me-1"></i> Voltar ao painel
         </a>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success">
+        <div class="alert alert-success rounded-4 shadow-sm border-0">
             <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
         </div>
     @endif
 
     @if ($errors->any())
-        <div class="alert alert-danger">
+        <div class="alert alert-danger rounded-4 shadow-sm border-0">
             <strong>Ops!</strong> Revise os campos destacados.
         </div>
     @endif
@@ -51,6 +51,15 @@
                             </div>
 
                             <div class="col-md-6">
+                                <label class="form-label fw-bold">Sobrenome</label>
+                                <input type="text"
+                                    name="sobrenome"
+                                    value="{{ old('sobrenome', $user->sobrenome) }}"
+                                    class="form-control @error('sobrenome') is-invalid @enderror">
+                                @error('sobrenome') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold">Email *</label>
                                 <input type="email"
                                     name="email"
@@ -60,7 +69,7 @@
                                 @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-bold">CPF *</label>
                                 <input type="text"
                                     id="cpf"
@@ -74,7 +83,7 @@
                                 @error('cpf') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-bold">Telefone *</label>
                                 <input type="text"
                                     id="telefone"
@@ -175,8 +184,27 @@
 
                         </div>
 
+                        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                            <div class="alert alert-warning rounded-4 mt-4 mb-0">
+                                Seu e-mail ainda não foi verificado.
+
+                                <form id="send-verification" method="POST" action="{{ route('verification.send') }}" class="d-inline">
+                                    @csrf
+                                    <button form="send-verification" class="btn btn-sm btn-outline-dark ms-2">
+                                        Reenviar verificação
+                                    </button>
+                                </form>
+
+                                @if (session('status') === 'verification-link-sent')
+                                    <div class="mt-2 text-success">
+                                        Novo link de verificação enviado.
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
                         <div class="mt-4 d-flex justify-content-end">
-                            <button class="btn btn-primary">
+                            <button class="btn btn-primary rounded-3">
                                 <i class="bi bi-check2-circle me-1"></i> Salvar alterações
                             </button>
                         </div>

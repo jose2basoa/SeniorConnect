@@ -10,11 +10,28 @@ return new class extends Migration
     {
         Schema::create('medicamentos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idoso_id')->constrained('idosos')->onDelete('cascade');
+
+            $table->foreignId('idoso_id')
+                ->constrained('idosos')
+                ->cascadeOnDelete();
+
             $table->string('nome');
+            $table->string('dosagem')->nullable();
             $table->time('horario');
+            $table->string('frequencia')->nullable();
+            $table->text('observacoes')->nullable();
+
+            $table->date('data_inicio')->nullable();
+            $table->date('data_fim')->nullable();
+
+            $table->boolean('ativo')->default(true);
             $table->boolean('tomado')->default(false);
+
             $table->timestamps();
+
+            $table->index('idoso_id');
+            $table->index('horario');
+            $table->index('ativo');
         });
     }
 

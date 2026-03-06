@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Idoso;
 use App\Models\Evento;
+use App\Models\Idoso;
 use Illuminate\Http\Request;
 
 class EventoController extends Controller
@@ -27,7 +27,7 @@ class EventoController extends Controller
 
         return view('eventos.index', [
             'idoso' => $idoso,
-            'eventos' => $idoso->eventos()->latest()->get(),
+            'eventos' => $idoso->eventos()->latest('data_evento')->latest()->get(),
         ]);
     }
 
@@ -43,12 +43,18 @@ class EventoController extends Controller
         $idoso = $this->buscarIdosoPermitido($idoso->id);
 
         $dados = $request->validate([
-            'tipo' => 'required|in:queda,medicacao,sintoma,rotina,consulta,comportamento,outro',
-            'descricao' => 'required|string|max:1000',
-            'resolvido' => 'nullable|boolean',
+            'tipo' => ['required', 'in:queda,medicacao,sintoma,rotina,consulta,comportamento,outro'],
+            'nivel' => ['required', 'in:baixo,medio,alto,critico'],
+            'origem' => ['nullable', 'in:manual,sistema,app'],
+            'descricao' => ['required', 'string', 'max:1000'],
+            'resolvido' => ['nullable', 'boolean'],
+            'data_evento' => ['nullable', 'date'],
         ]);
 
+        $dados['origem'] = $dados['origem'] ?? 'manual';
         $dados['resolvido'] = $request->boolean('resolvido');
+        $dados['resolvido_em'] = $dados['resolvido'] ? now() : null;
+        $dados['data_evento'] = $dados['data_evento'] ?? now();
 
         $idoso->eventos()->create($dados);
 
@@ -73,12 +79,19 @@ class EventoController extends Controller
         abort_unless($evento->idoso_id === $idoso->id, 404);
 
         $dados = $request->validate([
-            'tipo' => 'required|string|max:100',
-            'descricao' => 'required|string|max:1000',
-            'resolvido' => 'nullable|boolean',
+            'tipo' => ['required', 'in:queda,medicacao,sintoma,rotina,consulta,comportamento,outro'],
+            'nivel' => ['required', 'in:baixo,medio,alto,critico'],
+            'origem' => ['nullable', 'in:manual,sistema,app'],
+            'descricao' => ['required', 'string', 'max:1000'],
+            'resolvido' => ['nullable', 'boolean'],
+            'data_evento' => ['nullable', 'date'],
         ]);
 
-        $dados['resolvido'] = $request->boolean('resolvido');
+        $resolvido = $request->boolean('resolvido');
+
+        $dados['origem'] = $dados['origem'] ?? 'manual';
+        $dados['resolvido'] = $resolvido;
+        $dados['resolvido_em'] = $resolvido ? ($evento->resolvido_em ?? now()) : null;
 
         $evento->update($dados);
 
@@ -106,8 +119,11 @@ class EventoController extends Controller
 
         abort_unless($evento->idoso_id === $idoso->id, 404);
 
+        $novoStatus = !$evento->resolvido;
+
         $evento->update([
-            'resolvido' => !$evento->resolvido
+            'resolvido' => $novoStatus,
+            'resolvido_em' => $novoStatus ? now() : null,
         ]);
 
         return back()->with('success', 'Status do evento atualizado.');

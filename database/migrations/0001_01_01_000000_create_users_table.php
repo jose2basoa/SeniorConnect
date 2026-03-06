@@ -10,26 +10,33 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
             $table->string('name');
             $table->string('sobrenome')->nullable();
-            $table->string('cpf')->unique();
-            $table->string('telefone');
+
+            // salvar apenas números no backend
+            $table->string('cpf', 11)->unique();
+            $table->string('telefone', 20);
             $table->date('data_nascimento')->nullable();
 
-            $table->string('cep')->nullable();
+            $table->string('cep', 8)->nullable();
             $table->string('logradouro')->nullable();
-            $table->string('numero')->nullable();
+            $table->string('numero', 20)->nullable();
             $table->string('bairro')->nullable();
             $table->string('cidade')->nullable();
-            $table->string('estado', 2)->nullable();
+            $table->char('estado', 2)->nullable();
             $table->string('complemento')->nullable();
 
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('is_admin')->default(false);
+
             $table->rememberToken();
             $table->timestamps();
+
+            $table->index('cpf');
+            $table->index('email');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

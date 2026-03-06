@@ -38,7 +38,7 @@
 
                         <div class="row g-4">
                             <div class="col-md-7">
-                                <label for="nome" class="form-label fw-bold">Nome do medicamento</label>
+                                <label for="nome" class="form-label fw-bold">Nome do medicamento *</label>
                                 <input
                                     type="text"
                                     id="nome"
@@ -69,7 +69,7 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="horario" class="form-label fw-bold">Horário principal</label>
+                                <label for="horario" class="form-label fw-bold">Horário principal *</label>
                                 <input
                                     type="time"
                                     id="horario"
@@ -106,6 +106,35 @@
                                 @enderror
                             </div>
 
+                            <div class="col-md-6">
+                                <label for="data_inicio" class="form-label fw-bold">Data de início</label>
+                                <input
+                                    type="date"
+                                    id="data_inicio"
+                                    name="data_inicio"
+                                    class="form-control rounded-3 @error('data_inicio') is-invalid @enderror"
+                                    value="{{ old('data_inicio') }}"
+                                >
+                                @error('data_inicio')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="data_fim" class="form-label fw-bold">Data de término</label>
+                                <input
+                                    type="date"
+                                    id="data_fim"
+                                    name="data_fim"
+                                    class="form-control rounded-3 @error('data_fim') is-invalid @enderror"
+                                    value="{{ old('data_fim') }}"
+                                >
+                                @error('data_fim')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">Deixe em branco para uso contínuo.</div>
+                            </div>
+
                             <div class="col-12">
                                 <label for="observacoes" class="form-label fw-bold">Observações</label>
                                 <textarea
@@ -120,8 +149,28 @@
                                 @enderror
                             </div>
 
-                            <div class="col-12">
-                                <div class="form-check form-switch bg-light-subtle rounded-4 px-4 py-3 border">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch bg-light-subtle rounded-4 px-4 py-3 border h-100">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        role="switch"
+                                        id="ativo"
+                                        name="ativo"
+                                        value="1"
+                                        {{ old('ativo', '1') ? 'checked' : '' }}
+                                    >
+                                    <label class="form-check-label ms-2" for="ativo">
+                                        <span class="fw-bold">Medicamento ativo</span>
+                                        <span class="d-block text-muted small">
+                                            Desative apenas se o uso foi interrompido.
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch bg-light-subtle rounded-4 px-4 py-3 border h-100">
                                     <input
                                         class="form-check-input"
                                         type="checkbox"
@@ -169,14 +218,14 @@
                         <ul class="text-muted small ps-3 mb-0">
                             <li>Use o nome como aparece na receita ou embalagem.</li>
                             <li>Preencha a dosagem para evitar confusão entre medicamentos parecidos.</li>
-                            <li>Defina a frequência para facilitar consultas futuras e alertas.</li>
+                            <li>Defina frequência e período para facilitar consultas futuras.</li>
                             <li>Use observações para orientações relevantes do uso.</li>
                         </ul>
                     </div>
 
                     <div class="alert alert-light border rounded-4 small mb-0">
                         <div class="fw-bold mb-1">Dica</div>
-                        Ao padronizar nome, horário e frequência, a visualização da rotina medicamentosa fica mais clara.
+                        Ao padronizar nome, horário, frequência e período, a rotina medicamentosa fica mais clara.
                     </div>
                 </div>
             </div>

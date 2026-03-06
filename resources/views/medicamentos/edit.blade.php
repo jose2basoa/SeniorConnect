@@ -40,7 +40,7 @@
 
                         <div class="row g-4">
                             <div class="col-md-7">
-                                <label for="nome" class="form-label fw-bold">Nome do medicamento</label>
+                                <label for="nome" class="form-label fw-bold">Nome do medicamento *</label>
                                 <input
                                     type="text"
                                     id="nome"
@@ -71,7 +71,7 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="horario" class="form-label fw-bold">Horário principal</label>
+                                <label for="horario" class="form-label fw-bold">Horário principal *</label>
                                 <input
                                     type="time"
                                     id="horario"
@@ -108,6 +108,34 @@
                                 @enderror
                             </div>
 
+                            <div class="col-md-6">
+                                <label for="data_inicio" class="form-label fw-bold">Data de início</label>
+                                <input
+                                    type="date"
+                                    id="data_inicio"
+                                    name="data_inicio"
+                                    class="form-control rounded-3 @error('data_inicio') is-invalid @enderror"
+                                    value="{{ old('data_inicio', optional($medicamento->data_inicio)->format('Y-m-d')) }}"
+                                >
+                                @error('data_inicio')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="data_fim" class="form-label fw-bold">Data de término</label>
+                                <input
+                                    type="date"
+                                    id="data_fim"
+                                    name="data_fim"
+                                    class="form-control rounded-3 @error('data_fim') is-invalid @enderror"
+                                    value="{{ old('data_fim', optional($medicamento->data_fim)->format('Y-m-d')) }}"
+                                >
+                                @error('data_fim')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="col-12">
                                 <label for="observacoes" class="form-label fw-bold">Observações</label>
                                 <textarea
@@ -122,8 +150,28 @@
                                 @enderror
                             </div>
 
-                            <div class="col-12">
-                                <div class="form-check form-switch bg-light-subtle rounded-4 px-4 py-3 border">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch bg-light-subtle rounded-4 px-4 py-3 border h-100">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        role="switch"
+                                        id="ativo"
+                                        name="ativo"
+                                        value="1"
+                                        {{ old('ativo', $medicamento->ativo) ? 'checked' : '' }}
+                                    >
+                                    <label class="form-check-label ms-2" for="ativo">
+                                        <span class="fw-bold">Medicamento ativo</span>
+                                        <span class="d-block text-muted small">
+                                            Desative caso o medicamento não faça mais parte da rotina.
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch bg-light-subtle rounded-4 px-4 py-3 border h-100">
                                     <input
                                         class="form-check-input"
                                         type="checkbox"
@@ -173,6 +221,17 @@
 
                     <div class="mb-3">
                         <div class="text-muted small">Situação</div>
+
+                        @if($medicamento->ativo)
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-3 px-3 py-2 me-1">
+                                Ativo
+                            </span>
+                        @else
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-3 px-3 py-2 me-1">
+                                Inativo
+                            </span>
+                        @endif
+
                         @if($medicamento->tomado)
                             <span class="badge bg-success-subtle text-success border border-success-subtle rounded-3 px-3 py-2">
                                 Tomado

@@ -9,7 +9,7 @@
         <div>
             <h4 class="fw-bold mb-1">Dados pessoais</h4>
             <div class="text-muted small">
-                Todos os campos desta etapa são obrigatórios.
+                Preencha as informações principais para iniciar o cadastro.
             </div>
         </div>
 
@@ -25,7 +25,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger d-flex align-items-start gap-2">
+        <div class="alert alert-danger d-flex align-items-start gap-2 rounded-4">
             <i class="bi bi-exclamation-triangle mt-1"></i>
             <div>
                 <strong>Ops!</strong> Revise os campos destacados e tente novamente.
@@ -36,7 +36,9 @@
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body p-4">
 
-            <form method="POST" action="{{ route('idosos.store.step1') }}" novalidate>
+            <form method="POST"
+                  action="{{ $idoso ? route('idosos.store.step1', $idoso->id) : route('idosos.store.step1') }}"
+                  novalidate>
                 @csrf
 
                 <div class="row g-3">
@@ -62,7 +64,7 @@
                         <input
                             type="date"
                             name="data_nascimento"
-                            value="{{ old('data_nascimento', $idoso->data_nascimento ?? '') }}"
+                            value="{{ old('data_nascimento', isset($idoso->data_nascimento) ? \Carbon\Carbon::parse($idoso->data_nascimento)->format('Y-m-d') : '') }}"
                             class="form-control @error('data_nascimento') is-invalid @enderror"
                             required
                         >
@@ -72,14 +74,13 @@
                     </div>
 
                     <div class="col-12 col-md-4">
-                        <label class="form-label fw-semibold">Gênero / Sexo *</label>
+                        <label class="form-label fw-semibold">Sexo</label>
                         @php $sexo = old('sexo', $idoso->sexo ?? ''); @endphp
                         <select
                             name="sexo"
                             class="form-select @error('sexo') is-invalid @enderror"
-                            required
                         >
-                            <option value="" disabled {{ $sexo==='' ? 'selected' : '' }}>Selecione...</option>
+                            <option value="">Selecione...</option>
                             <option value="Masculino" {{ $sexo === 'Masculino' ? 'selected' : '' }}>Masculino</option>
                             <option value="Feminino" {{ $sexo === 'Feminino' ? 'selected' : '' }}>Feminino</option>
                             <option value="Outro" {{ $sexo === 'Outro' ? 'selected' : '' }}>Outro</option>
@@ -105,10 +106,11 @@
                         @error('cpf')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <div class="form-text">Esse dado é usado para identificação e vínculo seguro do cadastro.</div>
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label fw-semibold">Telefone *</label>
+                        <label class="form-label fw-semibold">Telefone</label>
                         <input
                             type="text"
                             name="telefone"
@@ -117,7 +119,6 @@
                             placeholder="(00) 00000-0000"
                             inputmode="numeric"
                             id="telefone"
-                            required
                             autocomplete="tel"
                         >
                         @error('telefone')
@@ -143,11 +144,11 @@
                 <hr class="my-4">
 
                 <div class="d-flex justify-content-between gap-2 flex-wrap">
-                    <a href="{{ route('idosos.cadastrar') }}" class="btn btn-outline-secondary px-4">
+                    <a href="{{ route('idosos.cadastrar') }}" class="btn btn-outline-secondary px-4 rounded-3">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
 
-                    <button type="submit" class="btn btn-primary px-4">
+                    <button type="submit" class="btn btn-primary px-4 rounded-3">
                         Próximo <i class="bi bi-arrow-right ms-1"></i>
                     </button>
                 </div>

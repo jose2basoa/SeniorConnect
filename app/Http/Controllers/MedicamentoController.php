@@ -8,19 +8,6 @@ use Illuminate\Http\Request;
 
 class MedicamentoController extends Controller
 {
-    private function buscarIdosoPermitido(int $idosoId)
-    {
-        $user = auth()->user();
-
-        $idoso = \App\Models\Idoso::with('users')->findOrFail($idosoId);
-
-        $temPermissao = $user->is_admin || $idoso->users->contains('id', $user->id);
-
-        abort_unless($temPermissao, 403, 'Você não tem permissão para acessar esta pessoa.');
-
-        return $idoso;
-    }
-    
     private function validarAcesso(Idoso $idoso): void
     {
         $user = auth()->user();
@@ -46,7 +33,7 @@ class MedicamentoController extends Controller
         $this->validarAcesso($idoso);
 
         $medicamentos = $idoso->medicamentos()
-            ->latest()
+            ->orderBy('horario')
             ->get();
 
         return view('medicamentos.index', compact('idoso', 'medicamentos'));
@@ -66,13 +53,17 @@ class MedicamentoController extends Controller
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'dosagem' => ['nullable', 'string', 'max:255'],
-            'horario' => ['required'],
+            'horario' => ['required', 'date_format:H:i'],
             'frequencia' => ['nullable', 'string', 'max:255'],
             'observacoes' => ['nullable', 'string'],
+            'data_inicio' => ['nullable', 'date'],
+            'data_fim' => ['nullable', 'date', 'after_or_equal:data_inicio'],
+            'ativo' => ['nullable', 'boolean'],
             'tomado' => ['nullable', 'boolean'],
         ]);
 
         $dados['idoso_id'] = $idoso->id;
+        $dados['ativo'] = $request->boolean('ativo', true);
         $dados['tomado'] = $request->boolean('tomado');
 
         Medicamento::create($dados);
@@ -98,12 +89,16 @@ class MedicamentoController extends Controller
         $dados = $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'dosagem' => ['nullable', 'string', 'max:255'],
-            'horario' => ['required'],
+            'horario' => ['required', 'date_format:H:i'],
             'frequencia' => ['nullable', 'string', 'max:255'],
             'observacoes' => ['nullable', 'string'],
+            'data_inicio' => ['nullable', 'date'],
+            'data_fim' => ['nullable', 'date', 'after_or_equal:data_inicio'],
+            'ativo' => ['nullable', 'boolean'],
             'tomado' => ['nullable', 'boolean'],
         ]);
 
+        $dados['ativo'] = $request->boolean('ativo');
         $dados['tomado'] = $request->boolean('tomado');
 
         $medicamento->update($dados);
@@ -125,16 +120,15 @@ class MedicamentoController extends Controller
             ->with('success', 'Medicamento removido com sucesso.');
     }
 
-    public function toggleTomado($idosoId, $medicamentoId)
+    public function toggleTomado(Idoso $idoso, Medicamento $medicamento)
     {
-        $idoso = $this->buscarIdosoPermitido($idosoId);
+        $this->validarAcesso($idoso);
+        $this->validarMedicamentoDoIdoso($idoso, $medicamento);
 
-        $medicamento = Medicamento::where('idoso_id', $idoso->id)
-            ->findOrFail($medicamentoId);
+        $medicamento->update([
+            'tomado' => !$medicamento->tomado,
+        ]);
 
-        $medicamento->tomado = !$medicamento->tomado;
-        $medicamento->save();
-
-        return redirect()->back()->with('success', 'Status do medicamento atualizado com sucesso.');
+        return back()->with('success', 'Status do medicamento atualizado com sucesso.');
     }
 }
