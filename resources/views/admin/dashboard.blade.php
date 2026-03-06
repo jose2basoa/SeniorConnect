@@ -9,6 +9,9 @@
             <h2 class="fw-bold mb-1">Painel Administrativo</h2>
             <small class="text-muted">Visão geral do sistema e últimos cadastros</small>
         </div>
+        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar ao painel
+        </a>
     </div>
 
     <!-- Cards Resumo (clicáveis) -->
@@ -125,39 +128,20 @@
         </div>
     </div>
 
-    <!-- GRÁFICOS -->
-    <div class="row g-4 mb-5">
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="fw-bold mb-0">Cadastros de Usuários</h5>
-                        <small class="text-muted">últimos 14 dias</small>
-                    </div>
-                    <canvas id="chartUsers" height="140"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="fw-bold mb-0">Cadastros de Idosos</h5>
-                        <small class="text-muted">últimos 14 dias</small>
-                    </div>
-                    <canvas id="chartIdosos" height="140"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Área dinâmica -->
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-header bg-light fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2 rounded-top-4">
             <span id="list-title">Últimos Usuários Cadastrados</span>
 
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="small text-muted mb-0">Linhas:</label>
+                    <select id="rowsPerPage" class="form-select form-select-sm" style="width:80px;">
+                        <option value="10" selected>10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
                 <span class="badge bg-secondary" id="list-count">
                     {{ $ultimosUsuarios->count() }}
                 </span>
@@ -173,7 +157,13 @@
         </div>
 
         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <small class="text-muted" id="table-info">Mostrando 0 de 0 registros</small>
 
+                <nav aria-label="Paginação da tabela">
+                    <ul class="pagination pagination-sm mb-0" id="table-pagination"></ul>
+                </nav>
+            </div>
             <!-- TABELA: USUÁRIOS (default) -->
             <div id="table-users" class="table-responsive">
                 @if($ultimosUsuarios->isEmpty())
@@ -273,143 +263,326 @@
         </div>
     </div>
 
+    <!-- GRÁFICOS -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold mb-0">Cadastros de Usuários</h5>
+                        <small class="text-muted">últimos 14 dias</small>
+                    </div>
+                    <canvas id="chartUsers" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold mb-0">Cadastros de Idosos</h5>
+                        <small class="text-muted">últimos 14 dias</small>
+                    </div>
+                    <canvas id="chartIdosos" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // ====== FILTRO (Cards clicáveis) ======
-    const buttons = document.querySelectorAll('.js-filter');
-    const title = document.getElementById('list-title');
-    const countBadge = document.getElementById('list-count');
+    document.addEventListener('DOMContentLoaded', () => {
+        const buttons = document.querySelectorAll('.js-filter');
+        const title = document.getElementById('list-title');
+        const countBadge = document.getElementById('list-count');
 
-    const tableUsers = document.getElementById('table-users');
-    const tableIdosos = document.getElementById('table-idosos');
+        const tableUsers = document.getElementById('table-users');
+        const tableIdosos = document.getElementById('table-idosos');
 
-    const linkUsers = document.getElementById('link-users');
-    const linkIdosos = document.getElementById('link-idosos');
+        const linkUsers = document.getElementById('link-users');
+        const linkIdosos = document.getElementById('link-idosos');
 
-    const userRows = tableUsers.querySelectorAll('tbody tr');
+        const userRows = Array.from(tableUsers.querySelectorAll('tbody tr'));
+        const idosoRows = Array.from(tableIdosos.querySelectorAll('tbody tr'));
 
-    function setActive(btn) {
-        buttons.forEach(b => b.classList.remove('ring-active'));
-        btn.classList.add('ring-active');
-    }
+        const rowsSelect = document.getElementById('rowsPerPage');
+        const pagination = document.getElementById('table-pagination');
+        const tableInfo = document.getElementById('table-info');
 
-    function safeCountRows(container) {
-        const tbody = container.querySelector('tbody');
-        if (!tbody) return 0;
-        return container.querySelectorAll('tbody tr').length;
-    }
+        let currentFilter = 'users';
+        let currentPage = 1;
+        let rowsPerPage = parseInt(rowsSelect.value);
 
-    function showUsers(mode) {
-        tableIdosos.classList.add('d-none');
-        tableUsers.classList.remove('d-none');
-
-        linkIdosos.classList.add('d-none');
-        linkUsers.classList.remove('d-none');
-
-        // Reset: mostra todos
-        userRows.forEach(r => r.classList.remove('d-none'));
-
-        if (mode === 'admins') {
-            userRows.forEach(r => {
-                if (r.getAttribute('data-is-admin') !== '1') r.classList.add('d-none');
-            });
-            title.textContent = 'Últimos Admins Cadastrados';
-        } else if (mode === 'tutores') {
-            userRows.forEach(r => {
-                if (r.getAttribute('data-is-admin') !== '0') r.classList.add('d-none');
-            });
-            title.textContent = 'Últimos Tutores Cadastrados';
-        } else {
-            title.textContent = 'Últimos Usuários Cadastrados';
+        function setActive(btn) {
+            buttons.forEach(b => b.classList.remove('ring-active'));
+            btn.classList.add('ring-active');
         }
 
-        const visible = [...userRows].filter(r => !r.classList.contains('d-none')).length;
-        countBadge.textContent = visible;
-    }
+        function getVisibleTable() {
+            return !tableUsers.classList.contains('d-none') ? tableUsers : tableIdosos;
+        }
 
-    function showIdosos() {
-        tableUsers.classList.add('d-none');
-        tableIdosos.classList.remove('d-none');
+        function getCurrentRows() {
+            if (currentFilter === 'idosos') {
+                return idosoRows;
+            }
 
-        linkUsers.classList.add('d-none');
-        linkIdosos.classList.remove('d-none');
+            if (currentFilter === 'admins') {
+                return userRows.filter(row => row.getAttribute('data-is-admin') === '1');
+            }
 
-        title.textContent = 'Últimos Idosos Cadastrados';
-        countBadge.textContent = safeCountRows(tableIdosos);
-    }
+            if (currentFilter === 'tutores') {
+                return userRows.filter(row => row.getAttribute('data-is-admin') === '0');
+            }
 
-    // default já fica em users e com ring-active no primeiro
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            setActive(btn);
-            const filter = btn.getAttribute('data-filter');
-            if (filter === 'idosos') showIdosos();
-            else showUsers(filter);
+            return userRows;
+        }
+
+        function hideAllRows() {
+            [...userRows, ...idosoRows].forEach(row => {
+                row.classList.add('d-none');
+            });
+        }
+
+        function renderPagination(totalPages, currentPage) {
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            const pages = [];
+
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push(i);
+                }
+            } else {
+                if (currentPage <= 3) {
+                    pages.push(1, 2, 3, '...', totalPages);
+                } else if (currentPage >= totalPages - 2) {
+                    pages.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+                } else {
+                    pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                }
+            }
+
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<button class="page-link" type="button">Anterior</button>`;
+            prevLi.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    goToPage(currentPage - 1);
+                }
+            });
+            pagination.appendChild(prevLi);
+
+            pages.forEach(item => {
+                const li = document.createElement('li');
+
+                if (item === '...') {
+                    li.className = 'page-item disabled';
+                    li.innerHTML = `<span class="page-link">...</span>`;
+                } else {
+                    li.className = `page-item ${item === currentPage ? 'active' : ''}`;
+                    li.innerHTML = `<button class="page-link" type="button">${item}</button>`;
+                    li.addEventListener('click', () => goToPage(item));
+                }
+
+                pagination.appendChild(li);
+            });
+
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<button class="page-link" type="button">Próxima</button>`;
+            nextLi.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    goToPage(currentPage + 1);
+                }
+            });
+            pagination.appendChild(nextLi);
+        }
+
+        function updateTable() {
+            rowsPerPage = parseInt(rowsSelect.value);
+
+            const rows = getCurrentRows();
+            const totalRows = rows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            hideAllRows();
+
+            rows.slice(start, end).forEach(row => {
+                row.classList.remove('d-none');
+            });
+
+            countBadge.textContent = totalRows;
+
+            if (totalRows === 0) {
+                tableInfo.textContent = 'Mostrando 0 de 0 registros';
+            } else {
+                tableInfo.textContent = `Mostrando ${start + 1} até ${Math.min(end, totalRows)} de ${totalRows} registros`;
+            }
+
+            renderPagination(totalPages, currentPage);
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            updateTable();
+        }
+
+        function showUsers(mode) {
+            currentFilter = mode;
+            currentPage = 1;
+
+            tableIdosos.classList.add('d-none');
+            tableUsers.classList.remove('d-none');
+
+            linkIdosos.classList.add('d-none');
+            linkUsers.classList.remove('d-none');
+
+            if (mode === 'admins') {
+                title.textContent = 'Últimos Admins Cadastrados';
+            } else if (mode === 'tutores') {
+                title.textContent = 'Últimos Tutores Cadastrados';
+            } else {
+                title.textContent = 'Últimos Usuários Cadastrados';
+            }
+
+            updateTable();
+        }
+
+        function showIdosos() {
+            currentFilter = 'idosos';
+            currentPage = 1;
+
+            tableUsers.classList.add('d-none');
+            tableIdosos.classList.remove('d-none');
+
+            linkUsers.classList.add('d-none');
+            linkIdosos.classList.remove('d-none');
+
+            title.textContent = 'Últimos Idosos Cadastrados';
+
+            updateTable();
+        }
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setActive(btn);
+
+                const filter = btn.getAttribute('data-filter');
+
+                if (filter === 'idosos') {
+                    showIdosos();
+                } else {
+                    showUsers(filter);
+                }
+            });
         });
+
+        rowsSelect.addEventListener('change', () => {
+            currentPage = 1;
+            updateTable();
+        });
+
+        const labels = @json($labels ?? []);
+        const users = @json($usersByDay ?? []);
+        const idosos = @json($idososByDay ?? []);
+
+        const common = {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        };
+
+        const elUsers = document.getElementById('chartUsers');
+        const elIdosos = document.getElementById('chartIdosos');
+
+        if (elUsers && labels.length) {
+            new Chart(elUsers, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Usuários',
+                        data: users,
+                        tension: 0.35,
+                        fill: true
+                    }]
+                },
+                options: common
+            });
+        }
+
+        if (elIdosos && labels.length) {
+            new Chart(elIdosos, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Idosos',
+                        data: idosos,
+                        borderWidth: 1
+                    }]
+                },
+                options: common
+            });
+        }
+
+        showUsers('users');
     });
-
-    // ====== GRÁFICOS ======
-    const labels = @json($labels ?? []);
-    const users = @json($usersByDay ?? []);
-    const idosos = @json($idososByDay ?? []);
-
-    const common = {
-        responsive: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: { mode: 'index', intersect: false }
-        },
-        scales: {
-            y: { beginAtZero: true, ticks: { precision: 0 } }
-        }
-    };
-
-    const elUsers = document.getElementById('chartUsers');
-    const elIdosos = document.getElementById('chartIdosos');
-
-    if (elUsers && labels.length) {
-        new Chart(elUsers, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Usuários',
-                    data: users,
-                    tension: 0.35,
-                    fill: true
-                }]
-            },
-            options: common
-        });
-    }
-
-    if (elIdosos && labels.length) {
-        new Chart(elIdosos, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Idosos',
-                    data: idosos,
-                    borderWidth: 1
-                }]
-            },
-            options: common
-        });
-    }
-});
 </script>
 
 <style>
-/* aparência premium nos cards clicáveis */
-.js-filter { border-radius: 1rem; transition: transform .12s ease, filter .12s ease, outline .12s ease; }
-.js-filter:hover { transform: translateY(-2px); filter: brightness(1.03); }
-.ring-active { outline: 3px solid rgba(255,255,255,.55); }
-.bg-warning.ring-active { outline: 3px solid rgba(0,0,0,.20); } /* contraste no amarelo */
+    /* ===== CARDS CLICÁVEIS DO DASHBOARD ===== */
+
+    .js-filter{
+        border-radius: 1rem;
+        transition: all .18s ease;
+        cursor: pointer;
+    }
+
+    /* hover */
+    .js-filter:hover{
+        transform: translateY(-4px);
+        filter: brightness(1.04);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    }
+
+    /* card ativo */
+    .ring-active{
+        transform: translateY(-2px);
+        filter: brightness(1.15);
+        box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+        outline: 3px solid rgba(255,255,255,.55);
+    }
+
+    /* ajuste especial para o card warning */
+    .bg-warning.ring-active{
+        outline: 3px solid rgba(0,0,0,.18);
+        filter: brightness(1.08);
+    }
+
+    /* animação suave de clique */
+    .js-filter:active{
+        transform: scale(.98);
+    }
+
 </style>
 @endpush
 

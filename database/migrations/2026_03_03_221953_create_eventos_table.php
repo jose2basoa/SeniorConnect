@@ -10,10 +10,15 @@ return new class extends Migration
     {
         Schema::create('eventos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idoso_id')->constrained('idosos')->onDelete('cascade');
-            $table->string('tipo'); // ex: queda, sintoma, alerta
-            $table->text('descricao')->nullable();
+
+            $table->foreignId('idoso_id')
+                ->constrained('idosos')
+                ->cascadeOnDelete();
+
+            $table->string('tipo');
+            $table->text('descricao');
             $table->boolean('resolvido')->default(false);
+
             $table->timestamps();
         });
     }

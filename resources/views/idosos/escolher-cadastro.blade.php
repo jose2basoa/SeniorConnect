@@ -48,6 +48,13 @@
 
     </div>
 
+    {{-- Botão voltar --}}
+    <div class="text-center mt-5">
+        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar ao painel
+        </a>
+    </div>
+
 </div>
 
 @endsection

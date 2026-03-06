@@ -38,9 +38,15 @@
                     <i class="bi bi-people me-1"></i> Gerenciar vinculados
                 </a>
             @else
-                <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle me-1"></i> Cadastrar pessoa acompanhada
-                </a>
+                @if(auth()->user()->is_admin)
+                    <a href="{{ url('idosos/gerenciar') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-people me-1"></i> Gerenciar idosos
+                    </a>
+                @else
+                    <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Cadastrar pessoa acompanhada
+                    </a>
+                @endif
             @endif
 
         </div>
@@ -231,23 +237,52 @@
                         <div class="fs-2 mb-2 text-warning">
                             <i class="bi bi-capsule"></i>
                         </div>
-                        <div class="text-muted small">Próximo medicamento</div>
 
-                        <div class="fw-semibold">
+                        <div class="text-muted small">
+                            {{ $proximoMedicamento && !$proximoMedicamento->tomado ? 'Próximo medicamento' : 'Medicamento atual' }}
+                        </div>
+
+                        <div class="fw-semibold mt-1">
                             {{ $proximoMedicamento->nome ?? 'Nenhum' }}
                         </div>
 
                         <small class="text-muted d-block mt-2">
-                            {{ $proximoMedicamento->horario ?? '' }}
+                            @if($proximoMedicamento && $proximoMedicamento->horario)
+                                {{ \Carbon\Carbon::parse($proximoMedicamento->horario)->format('H:i') }}
+                            @endif
                         </small>
+
+                        <div class="mt-2">
+                            @if($proximoMedicamento)
+                                @if($proximoMedicamento->tomado)
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-3 px-3 py-2">
+                                        Medicamento tomado
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-3 px-3 py-2">
+                                        Pendente
+                                    </span>
+                                @endif
+                            @endif
+                        </div>
 
                         <div class="mt-3">
                             @if($proximoMedicamento)
-                                <a href="#" class="btn btn-outline-warning btn-sm">
-                                    <i class="bi bi-check2-circle me-1"></i> Marcar como tomado
-                                </a>
+                                @if(!$proximoMedicamento->tomado)
+                                    <form action="{{ route('medicamentos.toggleTomado', [$idoso->id, $proximoMedicamento->id]) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-outline-warning btn-sm rounded-3">
+                                            <i class="bi bi-check2-circle me-1"></i> Marcar como tomado
+                                        </button>
+                                    </form>
+                                @else
+                                    <button class="btn btn-outline-secondary btn-sm rounded-3" disabled>
+                                        <i class="bi bi-check2-circle me-1"></i> Já marcado como tomado
+                                    </button>
+                                @endif
                             @else
-                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                <button class="btn btn-outline-secondary btn-sm rounded-3" disabled>
                                     <i class="bi bi-check2-circle me-1"></i> Sem agendamentos
                                 </button>
                             @endif
@@ -387,35 +422,56 @@
         {{-- ✅ NAVEGAÇÃO ENTRE TUTORADOS (RODAPÉ) --}}
         @if(isset($idosos) && $idosos->count() > 1 && $idoso)
 
-            <div class="card shadow-sm border-0 rounded-4 mt-4">
-                <div class="card-body">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-people me-2"></i>Pessoas acompanhadas
+                    </h5>
+                </div>
 
-                    <div class="fw-bold mb-3">
-                        <i class="bi bi-people me-1"></i>
-                        Pessoas acompanhadas
-                    </div>
+                <div class="d-flex flex-nowrap gap-3 overflow-auto pb-2">
+                    @foreach($idosos as $idoso)
+                        @php
+                            $ativo = isset($idosoSelecionado) && $idosoSelecionado && $idosoSelecionado->id === $idoso->id;
+                            $idade = \Carbon\Carbon::parse($idoso->data_nascimento)->age;
+                        @endphp
 
-                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('dashboard', ['idoso' => $idoso->id]) }}"
+                        class="card border-0 shadow-sm text-decoration-none flex-shrink-0 rounded-4 {{ $ativo ? 'bg-primary text-white' : 'bg-white text-dark' }}"
+                        style="width: 240px; min-width: 240px;">
 
-                        @foreach($idosos as $pessoa)
-                            <a href="{{ route('dashboard', ['idoso' => $pessoa->id]) }}"
-                            class="btn {{ $idoso->id == $pessoa->id ? 'btn-primary' : 'btn-outline-primary' }}">
+                            <div class="card-body d-flex align-items-center gap-3 p-3">
 
-                                {{ $pessoa->nome }}
+                                <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden {{ $ativo ? 'bg-white text-primary' : 'bg-primary-subtle text-primary' }}"
+                                    style="width: 52px; height: 52px; min-width: 52px;">
+                                    @if(!empty($idoso->foto))
+                                        <img src="{{ asset('storage/' . $idoso->foto) }}"
+                                            alt="{{ $idoso->nome }}"
+                                            class="w-100 h-100 object-fit-cover">
+                                    @else
+                                        <span class="fw-bold fs-5">
+                                            {{ strtoupper(mb_substr($idoso->nome, 0, 1)) }}
+                                        </span>
+                                    @endif
+                                </div>
 
-                                @if($pessoa->data_nascimento)
-                                    <small class="ms-1 text-muted">
-                                        ({{ \Carbon\Carbon::parse($pessoa->data_nascimento)->age }} anos)
-                                    </small>
-                                @endif
-                            </a>
-                        @endforeach
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-bold text-truncate">
+                                        {{ $idoso->nome }}
+                                    </div>
 
-                    </div>
+                                    <div class="small {{ $ativo ? 'text-white-50' : 'text-muted' }}">
+                                        {{ $idade }} anos
+                                    </div>
+                                </div>
 
+                            </div>
+                        </a>
+                    @endforeach
                 </div>
             </div>
-
+        </div>
         @endif
 
     @endif

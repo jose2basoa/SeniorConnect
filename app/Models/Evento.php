@@ -14,6 +14,14 @@ class Evento extends Model
         'tipo',
         'descricao',
         'resolvido',
-        'data',
     ];
+
+    protected $casts = [
+        'resolvido' => 'boolean',
+    ];
+
+    public function idoso()
+    {
+        return $this->belongsTo(\App\Models\Idoso::class);
+    }
 }

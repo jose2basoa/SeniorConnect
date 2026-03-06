@@ -17,7 +17,12 @@ class User extends Authenticatable
         'telefone',
         'data_nascimento',
         'cep',
-        'endereco',
+        'logradouro',
+        'numero',
+        'bairro',
+        'cidade',
+        'estado',
+        'complemento',
         'email',
         'password',
         'is_admin',
@@ -32,6 +37,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'data_nascimento' => 'date',
             'password' => 'hashed',
             'is_admin' => 'boolean',
         ];

@@ -14,16 +14,29 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $idosos = $user->idosos;
+        $idosos = $user->is_admin
+            ? Idoso::orderBy('nome')->get()
+            : $user->idosos()->orderBy('nome')->get();
 
-        $idoso = $idosos
-            ->where('id', $request->idoso)
-            ->first() ?? $idosos->first();
+        $idoso = null;
+
+        if ($request->filled('idoso')) {
+            $idoso = $idosos->firstWhere('id', (int) $request->idoso);
+        }
+
+        if (!$idoso) {
+            $idoso = $idosos->first();
+        }
 
         if (!$idoso) {
             return view('dashboard', [
+                'idoso' => null,
                 'idosos' => collect(),
-                'idoso' => null
+                'idosoSelecionado' => null,
+                'alertas' => 0,
+                'ultimaLocalizacao' => null,
+                'proximoMedicamento' => null,
+                'ultimosEventos' => collect(),
             ]);
         }
 
@@ -40,18 +53,25 @@ class DashboardController extends Controller
             ->orderBy('horario')
             ->first();
 
+        if (!$proximoMedicamento) {
+            $proximoMedicamento = Medicamento::where('idoso_id', $idoso->id)
+                ->orderByDesc('horario')
+                ->first();
+        }
+
         $ultimosEventos = Evento::where('idoso_id', $idoso->id)
             ->latest()
-            ->limit(5)
+            ->take(10)
             ->get();
 
-        return view('dashboard', compact(
-            'idosos',
-            'idoso',
-            'alertas',
-            'ultimaLocalizacao',
-            'proximoMedicamento',
-            'ultimosEventos'
-        ));
+        return view('dashboard', [
+            'idoso' => $idoso,
+            'idosos' => $idosos,
+            'idosoSelecionado' => $idoso,
+            'alertas' => $alertas,
+            'ultimaLocalizacao' => $ultimaLocalizacao,
+            'proximoMedicamento' => $proximoMedicamento,
+            'ultimosEventos' => $ultimosEventos,
+        ]);
     }
 }

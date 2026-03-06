@@ -23,12 +23,10 @@ class AdminController extends Controller
 
         $ultimosUsuarios = User::orderBy('is_admin', 'desc')
             ->orderBy('created_at', 'desc')
-            ->take(10)
             ->get();
 
         $ultimosIdosos = Idoso::with('users')
             ->orderBy('created_at', 'desc')
-            ->take(10)
             ->get();
 
         $dias = collect(range(13, 0))->map(fn($i) => Carbon::today()->subDays($i)->format('Y-m-d'));
@@ -241,25 +239,36 @@ class AdminController extends Controller
         $request->validate([
             'nome' => 'required|string|max:255',
             'data_nascimento' => 'required|date',
-            'sexo' => 'nullable|string|max:30',
-            'cpf' => 'nullable|string|max:14',
-            'telefone' => 'nullable|string|max:30',
+            'sexo' => 'required|in:Masculino,Feminino,Outro',
+            'cpf' => ['required', 'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/'],
+            'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
             'observacoes' => 'nullable|string|max:2000',
         ], [
             'nome.required' => 'Informe o nome.',
             'data_nascimento.required' => 'Informe a data de nascimento.',
             'data_nascimento.date' => 'Informe uma data válida.',
+
+            'sexo.required' => 'Selecione o sexo.',
+            'sexo.in' => 'Selecione uma opção válida para o sexo.',
+
+            'cpf.required' => 'Informe o CPF.',
+            'cpf.regex' => 'Informe o CPF no formato 000.000.000-00.',
+
+            'telefone.required' => 'Informe o telefone.',
+            'telefone.regex' => 'Informe o telefone no formato (00) 00000-0000.',        
         ]);
 
         Idoso::create([
             'nome' => $request->nome,
             'data_nascimento' => $request->data_nascimento,
             'sexo' => $request->sexo,
-            'cpf' => $request->cpf,
-            'telefone' => $request->telefone,
+            'cpf' => preg_replace('/\D/', '', $request->cpf),
+            'telefone' => $request->telefone ? preg_replace('/\D/', '', $request->telefone) : null,
             'observacoes' => $request->observacoes,
         ]);
 
-        return redirect()->route('admin.idosos')->with('success', 'Cadastro criado com sucesso!');
+        return redirect()
+            ->route('admin.idosos')
+            ->with('success', 'Cadastro criado com sucesso!');
     }
 }

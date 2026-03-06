@@ -12,9 +12,19 @@ class Medicamento extends Model
     protected $fillable = [
         'idoso_id',
         'nome',
+        'dosagem',
         'horario',
-        'tomado'
+        'frequencia',
+        'observacoes',
+        'tomado',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'tomado' => 'boolean',
+        ];
+    }
 
     public function idoso()
     {

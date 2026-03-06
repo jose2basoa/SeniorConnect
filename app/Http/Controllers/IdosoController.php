@@ -245,13 +245,17 @@ class IdosoController extends Controller
 
     public function gerenciar()
     {
-        $user = Auth::user();
-        if (!$user) abort(401);
+        $user = auth()->user();
 
-        /** @var User $user */
-        $idosos = $user->is_admin
-            ? Idoso::with('users')->latest()->get()
-            : $user->idosos()->latest()->get();
+        $idosos = \App\Models\Idoso::with('users')->get();
+
+        if ($user && $user->is_admin) {
+            $idosos = $idosos->sortByDesc(function ($idoso) use ($user) {
+                return $idoso->users->contains('id', $user->id) ? 1 : 0;
+            })->values();
+        } else {
+            $idosos = $user->idosos()->with('users')->get();
+        }
 
         return view('idosos.gerenciar', compact('idosos'));
     }

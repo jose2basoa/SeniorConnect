@@ -36,4 +36,14 @@ class Idoso extends Model
     {
         return $this->belongsToMany(User::class, 'idoso_user')->withTimestamps();
     }
+
+    public function medicamentos()
+    {
+        return $this->hasMany(\App\Models\Medicamento::class);
+    }
+
+    public function eventos()
+    {
+        return $this->hasMany(\App\Models\Evento::class);
+    }
 }
