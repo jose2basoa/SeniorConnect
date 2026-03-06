@@ -39,11 +39,11 @@
                 </a>
             @else
                 @if(auth()->user()->is_admin)
-                    <a href="{{ url('idosos/gerenciar') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ url('idosos/gerenciar') }}" class="btn btn-primary">
                         <i class="bi bi-people me-1"></i> Gerenciar idosos
                     </a>
                 @else
-                    <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-1"></i> Cadastrar pessoa acompanhada
                     </a>
                 @endif

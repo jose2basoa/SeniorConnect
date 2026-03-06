@@ -14,20 +14,27 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $idosos = $user->is_admin
-            ? Idoso::orderBy('nome')->get()
-            : $user->idosos()->orderBy('nome')->get();
+        // No dashboard, sempre mostrar apenas idosos vinculados ao usuário,
+        // inclusive se ele for admin.
+        $idosos = $user->idosos()
+            ->orderBy('nome')
+            ->get();
 
         $idoso = null;
 
+        // Se veio um idoso pela URL, valida se ele está entre os vinculados
         if ($request->filled('idoso')) {
             $idoso = $idosos->firstWhere('id', (int) $request->idoso);
+
+            abort_unless($idoso, 403, 'Você não tem permissão para acessar esta pessoa.');
         }
 
+        // Se não veio nenhum idoso na URL, pega o primeiro vinculado
         if (!$idoso) {
             $idoso = $idosos->first();
         }
 
+        // Se não houver nenhum idoso vinculado, exibe dashboard vazio
         if (!$idoso) {
             return view('dashboard', [
                 'idoso' => null,
