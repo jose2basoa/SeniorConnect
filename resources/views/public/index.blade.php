@@ -3,13 +3,13 @@
 @section('content')
 
 <style>
-  section { scroll-margin-top: 90px; }
+    section { scroll-margin-top: 90px; }
 </style>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
     <div class="container">
         <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
-           href="{{ auth()->check() ? route('dashboard') : url('/') }}">
+            href="{{ auth()->check() ? route('dashboard') : url('/') }}">
             <i class="bi bi-shield-check"></i>
             Sênior Conecta
         </a>
@@ -313,7 +313,7 @@
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center gap-3 mb-3">
                                 <img src="{{ $d['foto'] }}" alt="Foto de {{ $d['nome'] }}"
-                                     class="rounded-circle" width="52" height="52">
+                                    class="rounded-circle" width="52" height="52">
                                 <div class="text-start">
                                     <div class="fw-bold">{{ $d['nome'] }}</div>
                                     <small class="text-muted">{{ $d['papel'] }}</small>
@@ -354,8 +354,8 @@
                                 <div class="col-12">
                                     <label class="form-label">Comentário</label>
                                     <textarea name="mensagem" class="form-control" rows="4"
-                                              placeholder="Conte como você imagina que o sistema pode ajudar..."
-                                              required></textarea>
+                                        placeholder="Conte como você imagina que o sistema pode ajudar..."
+                                        required></textarea>
                                 </div>
 
                                 <div class="col-12 d-flex justify-content-end">

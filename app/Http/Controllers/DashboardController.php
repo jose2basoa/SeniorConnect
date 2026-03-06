@@ -10,19 +10,20 @@ use App\Models\Localizacao;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        $idoso = $user->idosos()->first();
+        $idosos = $user->idosos;
+
+        $idoso = $idosos
+            ->where('id', $request->idoso)
+            ->first() ?? $idosos->first();
 
         if (!$idoso) {
             return view('dashboard', [
-                'idoso' => null,
-                'alertas' => 0,
-                'ultimaLocalizacao' => null,
-                'proximoMedicamento' => null,
-                'ultimosEventos' => collect()
+                'idosos' => collect(),
+                'idoso' => null
             ]);
         }
 
@@ -41,10 +42,11 @@ class DashboardController extends Controller
 
         $ultimosEventos = Evento::where('idoso_id', $idoso->id)
             ->latest()
-            ->take(5)
+            ->limit(5)
             ->get();
 
         return view('dashboard', compact(
+            'idosos',
             'idoso',
             'alertas',
             'ultimaLocalizacao',

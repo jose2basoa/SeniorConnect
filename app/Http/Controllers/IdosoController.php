@@ -293,7 +293,14 @@ class IdosoController extends Controller
         $user = Auth::user();
         if (!$user) abort(401);
 
-        // Admin pode desvincular qualquer tutor? Aqui só remove o vínculo do usuário atual
+        $temVinculo = $idoso->users()
+            ->where('users.id', $user->id)
+            ->exists();
+
+        if (!$temVinculo) {
+            return back()->with('error', 'Você não possui vínculo com este cadastro.');
+        }
+
         $idoso->users()->detach($user->id);
 
         return redirect()
@@ -461,6 +468,18 @@ class IdosoController extends Controller
         return redirect()
             ->route('idosos.show', $idoso->id)
             ->with('success', 'Perfil atualizado com sucesso!');
+    }
+
+    public function vincularAdmin(Idoso $idoso)
+    {
+        $user = auth()->user();
+
+        // evita duplicar vínculo
+        if (!$idoso->users()->where('users.id', $user->id)->exists()) {
+            $idoso->users()->attach($user->id);
+        }
+
+        return back()->with('success', 'Vínculo realizado com sucesso.');
     }
 
 }

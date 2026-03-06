@@ -29,7 +29,7 @@ class Idoso extends Model
 
     public function contatosEmergencia()
     {
-        return $this->hasMany(ContatoEmergencia::class);
+        return $this->hasMany(\App\Models\ContatoEmergencia::class);
     }
 
     public function users()

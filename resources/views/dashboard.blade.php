@@ -10,9 +10,10 @@
 <div class="container py-5">
 
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
         <div>
             <h3 class="mb-1 fw-bold">Painel de Monitoramento</h3>
+
             <div class="text-muted">
                 <i class="bi bi-calendar3 me-1"></i> {{ $hoje }}
                 <span class="mx-2">•</span>
@@ -33,9 +34,8 @@
                     <i class="bi {{ $alertas > 0 ? 'bi-exclamation-triangle' : 'bi-check-circle' }} me-1"></i>
                     {{ $alertas > 0 ? "$alertas alertas ativos" : 'Sem alertas' }}
                 </span>
-
-                <a href="{{ route('idosos.gerenciar') }}" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-gear me-1"></i> Gerenciar
+                <a href="{{ route('idosos.gerenciar') }}" class="btn btn-primary">
+                    <i class="bi bi-people me-1"></i> Gerenciar vinculados
                 </a>
             @else
                 <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary btn-sm">
@@ -46,8 +46,60 @@
         </div>
     </div>
 
+    {{-- ✅ IDEIA EXTRA: “quem está sendo monitorado agora” --}}
+    @if($idoso)
+        @php
+            $idade = $idoso->data_nascimento
+                ? \Carbon\Carbon::parse($idoso->data_nascimento)->age
+                : null;
+
+            $statusLabel = $idoso->status_online ? 'Online' : 'Offline';
+            $statusClass = $idoso->status_online ? 'text-success' : 'text-danger';
+            $statusIcon  = $idoso->status_online ? 'bi-wifi' : 'bi-wifi-off';
+        @endphp
+
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <h4 class="fw-bold mb-0">{{ $idoso->nome }}</h4>
+
+                        @if(!is_null($idade))
+                            <span class="badge bg-light text-dark border">
+                                {{ $idade }} anos
+                            </span>
+                        @endif
+
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi {{ $statusIcon }} me-1 {{ $statusClass }}"></i>
+                            <span class="{{ $statusClass }} fw-semibold">{{ $statusLabel }}</span>
+                        </span>
+                    </div>
+
+                    <small class="text-muted d-block mt-1">
+                        @if($idoso->ultima_atividade)
+                            Última atividade às <span class="fw-semibold">{{ \Carbon\Carbon::parse($idoso->ultima_atividade)->format('H:i') }}</span>
+                        @else
+                            Sem registro de atividade recente
+                        @endif
+                    </small>
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    {{-- ✅ “Dados pessoais” agora vai direto pro perfil do idoso atual --}}
+                    <a href="{{ route('idosos.show', $idoso->id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-badge me-1"></i> Dados pessoais
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    @endif
+
+
     {{-- SEM IDOSO: Onboarding --}}
     @if(!$idoso)
+
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4 p-md-5 text-center">
                 <div class="display-6 mb-2">👵📱</div>
@@ -151,7 +203,6 @@
                         </small>
 
                         @php
-                            // Se você tiver lat/lng na tabela, use:
                             $lat = $ultimaLocalizacao->lat ?? null;
                             $lng = $ultimaLocalizacao->lng ?? null;
                         @endphp
@@ -192,7 +243,6 @@
 
                         <div class="mt-3">
                             @if($proximoMedicamento)
-                                {{-- Troque por sua rota real depois --}}
                                 <a href="#" class="btn btn-outline-warning btn-sm">
                                     <i class="bi bi-check2-circle me-1"></i> Marcar como tomado
                                 </a>
@@ -208,83 +258,7 @@
 
         </div>
 
-        {{-- AÇÕES RÁPIDAS (com mais utilidade) --}}
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-header bg-danger text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span class="fw-bold">
-                    <i class="bi bi-lightning-charge me-1"></i> Ações rápidas
-                </span>
-                <small class="opacity-75">
-                    Use em caso de urgência / necessidade imediata
-                </small>
-            </div>
-
-            <div class="card-body">
-                <div class="row g-3 text-center">
-
-                    <div class="col-md-3">
-                        <a href="tel:192" class="btn btn-danger w-100">
-                            <i class="bi bi-ambulance me-1"></i> SAMU (192)
-                        </a>
-                    </div>
-
-                    <div class="col-md-3">
-                        <a href="tel:190" class="btn btn-dark w-100">
-                            <i class="bi bi-shield me-1"></i> Polícia (190)
-                        </a>
-                    </div>
-
-                    <div class="col-md-3">
-                        <a href="tel:193" class="btn btn-warning w-100">
-                            <i class="bi bi-fire me-1"></i> Bombeiros (193)
-                        </a>
-                    </div>
-
-                    <div class="col-md-3">
-                        {{-- se você tiver telefone do idoso, troque o href --}}
-                        <a href="{{ $idoso->telefone ? 'tel:'.$idoso->telefone : '#' }}"
-                           class="btn btn-primary w-100 {{ $idoso->telefone ? '' : 'disabled' }}">
-                            <i class="bi bi-telephone me-1"></i> Ligar
-                        </a>
-                    </div>
-
-                    <div class="col-md-3">
-                        {{-- WhatsApp (se tiver telefone) --}}
-                        @php
-                            $whats = $idoso->telefone ? preg_replace('/\D/', '', $idoso->telefone) : null;
-                        @endphp
-                        <a href="{{ $whats ? 'https://wa.me/55'.$whats : '#' }}"
-                           target="_blank"
-                           class="btn btn-outline-success w-100 {{ $whats ? '' : 'disabled' }}">
-                            <i class="bi bi-whatsapp me-1"></i> WhatsApp
-                        </a>
-                    </div>
-
-                    <div class="col-md-3">
-                        <a href="{{ route('idosos.gerenciar') }}" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-person-gear me-1"></i> Dados do perfil
-                        </a>
-                    </div>
-
-                    <div class="col-md-3">
-                        {{-- Ajuste para sua rota real de medicamentos --}}
-                        <a href="#" class="btn btn-outline-warning w-100">
-                            <i class="bi bi-capsule me-1"></i> Medicamentos
-                        </a>
-                    </div>
-
-                    <div class="col-md-3">
-                        {{-- Ajuste para sua rota real de histórico --}}
-                        <a href="#" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-clock-history me-1"></i> Histórico
-                        </a>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        {{-- ÚLTIMOS EVENTOS (mais legível e com ícones) --}}
+        {{-- ÚLTIMOS EVENTOS --}}
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-header bg-primary text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <span class="fw-bold">
@@ -317,7 +291,6 @@
                                         $isAlta = ($evento->gravidade ?? '') === 'alta';
                                         $badge = $isAlta ? 'bg-danger' : 'bg-secondary';
 
-                                        // Ícones por tipo (personalize depois)
                                         $icone = match($evento->tipo) {
                                             'queda' => 'bi-person-falling',
                                             'alerta' => 'bi-exclamation-triangle',
@@ -352,7 +325,6 @@
                     </div>
 
                     <div class="mt-3 d-flex justify-content-end">
-                        {{-- Ajuste para sua rota real de eventos --}}
                         <a href="#" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-list-ul me-1"></i> Ver histórico completo
                         </a>
@@ -362,7 +334,93 @@
             </div>
         </div>
 
+        {{-- AÇÕES RÁPIDAS --}}
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-danger text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span class="fw-bold">
+                    <i class="bi bi-lightning-charge me-1"></i> Ações rápidas
+                </span>
+                <small class="opacity-75">
+                    Atalhos do tutor para o(a) acompanhado(a) selecionado(a)
+                </small>
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3 text-center">
+
+                    {{-- Ligar para o idoso --}}
+                    <div class="col-md-3">
+                        <a href="{{ $idoso->telefone ? 'tel:'.$idoso->telefone : '#' }}"
+                        class="btn btn-primary w-100 {{ $idoso->telefone ? '' : 'disabled' }}">
+                            <i class="bi bi-telephone me-1"></i> Ligar
+                        </a>
+                    </div>
+
+                    {{-- Medicamentos --}}
+                    <div class="col-md-3">
+                        <a href="{{ route('medicamentos.index', $idoso->id) }}"
+                        class="btn btn-outline-warning w-100">
+                            <i class="bi bi-capsule me-1"></i> Medicamentos
+                        </a>
+                    </div>
+
+                    {{-- Eventos --}}
+                    <div class="col-md-3">
+                        <a href="{{ route('eventos.index', $idoso->id) }}"
+                        class="btn btn-outline-primary w-100">
+                            <i class="bi bi-bell me-1"></i> Eventos
+                        </a>
+                    </div>
+
+                    {{-- Contatos (tutores + emergência) --}}
+                    <div class="col-md-3">
+                        <a href="{{ route('contatos.index', $idoso->id) }}"
+                        class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-telephone-forward me-1"></i> Contatos
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {{-- ✅ NAVEGAÇÃO ENTRE TUTORADOS (RODAPÉ) --}}
+        @if(isset($idosos) && $idosos->count() > 1 && $idoso)
+
+            <div class="card shadow-sm border-0 rounded-4 mt-4">
+                <div class="card-body">
+
+                    <div class="fw-bold mb-3">
+                        <i class="bi bi-people me-1"></i>
+                        Pessoas acompanhadas
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        @foreach($idosos as $pessoa)
+                            <a href="{{ route('dashboard', ['idoso' => $pessoa->id]) }}"
+                            class="btn {{ $idoso->id == $pessoa->id ? 'btn-primary' : 'btn-outline-primary' }}">
+
+                                {{ $pessoa->nome }}
+
+                                @if($pessoa->data_nascimento)
+                                    <small class="ms-1 text-muted">
+                                        ({{ \Carbon\Carbon::parse($pessoa->data_nascimento)->age }} anos)
+                                    </small>
+                                @endif
+                            </a>
+                        @endforeach
+
+                    </div>
+
+                </div>
+            </div>
+
+        @endif
+
     @endif
+
+
 
 </div>
 

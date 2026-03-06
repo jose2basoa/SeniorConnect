@@ -126,13 +126,12 @@
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label fw-semibold">Observações *</label>
+                        <label class="form-label fw-semibold">Observações</label>
                         <textarea
                             name="observacoes"
                             class="form-control @error('observacoes') is-invalid @enderror"
                             rows="3"
                             placeholder="Ex.: cuidados, rotina, preferências, limitações..."
-                            required
                         >{{ old('observacoes', $idoso->observacoes ?? '') }}</textarea>
                         @error('observacoes')
                             <div class="invalid-feedback">{{ $message }}</div>

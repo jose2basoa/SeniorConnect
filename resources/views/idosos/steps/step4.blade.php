@@ -21,7 +21,13 @@
     </div>
 
     <div class="progress mb-4" style="height: 10px;">
-        <div class="progress-bar bg-success" style="width: 100%;" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress-bar bg-primary"
+            style="width: 100%;"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100">
+        </div>
     </div>
 
     @if ($errors->any())
@@ -45,7 +51,7 @@
                     <div class="contato-item border rounded-4 p-3 mb-3 bg-light">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="fw-bold">
-                                Contato principal <span class="badge bg-success ms-2">Obrigatório</span>
+                                Contato principal <span class="badge bg-warning text-dark ms-2">Obrigatório</span>
                             </div>
                             <div class="text-muted small">Avisado primeiro</div>
                         </div>
@@ -54,11 +60,11 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Nome *</label>
                                 <input type="text"
-                                       name="contatos[0][nome]"
-                                       value="{{ old('contatos.0.nome', $contatos[0]->nome ?? '') }}"
-                                       class="form-control @error('contatos.0.nome') is-invalid @enderror"
-                                       placeholder="Ex.: João da Silva"
-                                       required>
+                                    name="contatos[0][nome]"
+                                    value="{{ old('contatos.0.nome', $contatos[0]->nome ?? '') }}"
+                                    class="form-control @error('contatos.0.nome') is-invalid @enderror"
+                                    placeholder="Ex.: João da Silva"
+                                    required>
                                 @error('contatos.0.nome')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -67,12 +73,12 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Telefone *</label>
                                 <input type="text"
-                                       name="contatos[0][telefone]"
-                                       value="{{ old('contatos.0.telefone', $contatos[0]->telefone ?? '') }}"
-                                       class="form-control telefone @error('contatos.0.telefone') is-invalid @enderror"
-                                       placeholder="(00) 00000-0000"
-                                       inputmode="numeric"
-                                       required>
+                                    name="contatos[0][telefone]"
+                                    value="{{ old('contatos.0.telefone', $contatos[0]->telefone ?? '') }}"
+                                    class="form-control telefone @error('contatos.0.telefone') is-invalid @enderror"
+                                    placeholder="(00) 00000-0000"
+                                    inputmode="numeric"
+                                    required>
                                 @error('contatos.0.telefone')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -81,10 +87,10 @@
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Parentesco (opcional)</label>
                                 <input type="text"
-                                       name="contatos[0][parentesco]"
-                                       value="{{ old('contatos.0.parentesco', $contatos[0]->parentesco ?? '') }}"
-                                       class="form-control"
-                                       placeholder="Ex.: Filho, Filha, Cuidador, Irmão...">
+                                    name="contatos[0][parentesco]"
+                                    value="{{ old('contatos.0.parentesco', $contatos[0]->parentesco ?? '') }}"
+                                    class="form-control"
+                                    placeholder="Ex.: Filho, Filha, Cuidador, Irmão...">
                             </div>
                         </div>
                     </div>
@@ -114,28 +120,28 @@
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">Nome *</label>
                                         <input type="text"
-                                               name="contatos[{{ $i }}][nome]"
-                                               value="{{ $c['nome'] ?? '' }}"
-                                               class="form-control"
-                                               required>
+                                            name="contatos[{{ $i }}][nome]"
+                                            value="{{ $c['nome'] ?? '' }}"
+                                            class="form-control"
+                                            required>
                                     </div>
 
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">Telefone *</label>
                                         <input type="text"
-                                               name="contatos[{{ $i }}][telefone]"
-                                               value="{{ $c['telefone'] ?? '' }}"
-                                               class="form-control telefone"
-                                               inputmode="numeric"
-                                               required>
+                                            name="contatos[{{ $i }}][telefone]"
+                                            value="{{ $c['telefone'] ?? '' }}"
+                                            class="form-control telefone"
+                                            inputmode="numeric"
+                                            required>
                                     </div>
 
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Parentesco (opcional)</label>
                                         <input type="text"
-                                               name="contatos[{{ $i }}][parentesco]"
-                                               value="{{ $c['parentesco'] ?? '' }}"
-                                               class="form-control">
+                                            name="contatos[{{ $i }}][parentesco]"
+                                            value="{{ $c['parentesco'] ?? '' }}"
+                                            class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -160,11 +166,11 @@
 
                 <div class="d-flex justify-content-between gap-2 flex-wrap">
                     <a href="{{ route('idosos.create.step3', $idoso->id) }}"
-                       class="btn btn-outline-secondary px-4">
+                    class="btn btn-outline-secondary px-4">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
 
-                    <button type="submit" class="btn btn-success px-4">
+                    <button type="submit" class="btn btn-primary px-4">
                         Finalizar cadastro <i class="bi bi-check2-circle ms-1"></i>
                     </button>
                 </div>
@@ -216,28 +222,28 @@
                     <div class="col-12 col-md-6">
                         <label class="form-label fw-semibold">Nome *</label>
                         <input type="text"
-                               name="contatos[${index}][nome]"
-                               class="form-control"
-                               placeholder="Ex.: Ana Souza"
-                               required>
+                            name="contatos[${index}][nome]"
+                            class="form-control"
+                            placeholder="Ex.: Ana Souza"
+                            required>
                     </div>
 
                     <div class="col-12 col-md-6">
                         <label class="form-label fw-semibold">Telefone *</label>
                         <input type="text"
-                               name="contatos[${index}][telefone]"
-                               class="form-control telefone"
-                               placeholder="(00) 00000-0000"
-                               inputmode="numeric"
-                               required>
+                            name="contatos[${index}][telefone]"
+                            class="form-control telefone"
+                            placeholder="(00) 00000-0000"
+                            inputmode="numeric"
+                            required>
                     </div>
 
                     <div class="col-12">
                         <label class="form-label fw-semibold">Parentesco (opcional)</label>
                         <input type="text"
-                               name="contatos[${index}][parentesco]"
-                               class="form-control"
-                               placeholder="Ex.: Cuidador, Irmã, Vizinho...">
+                            name="contatos[${index}][parentesco]"
+                            class="form-control"
+                            placeholder="Ex.: Cuidador, Irmã, Vizinho...">
                     </div>
                 </div>
             </div>
