@@ -288,125 +288,190 @@
         </div>
 
         <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-header bg-primary text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span class="fw-bold">
-                    <i class="bi bi-bell me-1"></i> Últimos eventos
-                </span>
-                <small class="opacity-75">Registros recentes</small>
+
+            @php
+                $alertasAtivos = $alertas ?? 0;
+                $alertasCriticos = $ultimosEventos->where('nivel', 'critico')->count();
+            @endphp
+
+            <div class="card-header bg-primary text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2"
+                 data-bs-toggle="collapse"
+                 data-bs-target="#eventosCollapse"
+                 aria-expanded="false"
+                 aria-controls="eventosCollapse"
+                 style="cursor:pointer;">
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-bell"></i>
+                        Últimos eventos
+
+                        @if($alertasAtivos > 0)
+                            <span class="badge bg-light text-primary fw-bold rounded-pill px-2 py-1">
+                                {{ $alertasAtivos }}
+                            </span>
+                        @endif
+
+                        @if($alertasCriticos > 0)
+                            <span class="badge bg-danger fw-semibold rounded-pill px-2 py-1">
+                                {{ $alertasCriticos }} crítico{{ $alertasCriticos > 1 ? 's' : '' }}
+                            </span>
+                        @endif
+                    </span>
+
+                    @if($alertasAtivos > 0)
+                        <small class="text-white-50">
+                            {{ $alertasAtivos }} alerta{{ $alertasAtivos > 1 ? 's' : '' }} ativo{{ $alertasAtivos > 1 ? 's' : '' }}
+                        </small>
+                    @else
+                        <small class="text-white-50">
+                            Sem alertas ativos no momento
+                        </small>
+                    @endif
+                </div>
+
+                <small class="opacity-75 d-flex align-items-center">
+                    Registros recentes
+                    <i class="bi bi-chevron-down ms-2 collapse-arrow"></i>
+                </small>
             </div>
 
-            <div class="card-body">
-                @if($ultimosEventos->isEmpty())
-                    <div class="text-muted">
-                        Nenhum evento registrado até o momento.
-                    </div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Descrição</th>
-                                    <th class="d-none d-md-table-cell">Nível</th>
-                                    <th class="text-end">Hora</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($ultimosEventos as $evento)
-                                    @php
-                                        $nivel = $evento->nivel ?? 'medio';
+            <div id="eventosCollapse" class="collapse">
+                <div class="card-body">
 
-                                        $badge = match($nivel) {
-                                            'critico' => 'bg-danger',
-                                            'alto' => 'bg-warning text-dark',
-                                            'medio' => 'bg-secondary',
-                                            'baixo' => 'bg-success',
-                                            default => 'bg-secondary'
-                                        };
-
-                                        $linha = in_array($nivel, ['alto', 'critico']) ? 'table-danger' : '';
-
-                                        $icone = match($evento->tipo) {
-                                            'queda' => 'bi-exclamation-triangle',
-                                            'medicacao' => 'bi-capsule',
-                                            'sintoma' => 'bi-heart-pulse',
-                                            'consulta' => 'bi-hospital',
-                                            'comportamento' => 'bi-person',
-                                            'rotina' => 'bi-calendar-check',
-                                            'outro' => 'bi-journal-text',
-                                            default => 'bi-dot'
-                                        };
-                                    @endphp
-
-                                    <tr class="{{ $linha }}">
-                                        <td class="fw-semibold">
-                                            <i class="bi {{ $icone }} me-1"></i>
-                                            {{ ucfirst($evento->tipo) }}
-                                        </td>
-
-                                        <td class="text-muted">
-                                            {{ $evento->descricao }}
-                                        </td>
-
-                                        <td class="d-none d-md-table-cell">
-                                            <span class="badge {{ $badge }}">
-                                                {{ ucfirst($nivel) }}
-                                            </span>
-                                        </td>
-
-                                        <td class="text-end text-muted">
-                                            {{ $evento->data_evento ? \Carbon\Carbon::parse($evento->data_evento)->format('H:i') : $evento->created_at->format('H:i') }}
-                                        </td>
+                    @if($ultimosEventos->isEmpty())
+                        <div class="text-muted">
+                            Nenhum evento registrado até o momento.
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Descrição</th>
+                                        <th class="d-none d-md-table-cell">Nível</th>
+                                        <th class="text-end">Hora</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @foreach($ultimosEventos as $evento)
+                                        @php
+                                            $nivel = $evento->nivel ?? 'medio';
 
-                    <div class="mt-3 d-flex justify-content-end">
-                        <a href="{{ route('eventos.index', ['idoso' => $idoso->id]) }}" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-list-ul me-1"></i> Ver histórico completo
-                        </a>
-                    </div>
-                @endif
+                                            $badge = match($nivel) {
+                                                'critico' => 'bg-danger',
+                                                'alto' => 'bg-warning text-dark',
+                                                'medio' => 'bg-secondary',
+                                                'baixo' => 'bg-success',
+                                                default => 'bg-secondary'
+                                            };
+
+                                            $linha = match($nivel) {
+                                                'critico' => 'table-danger',
+                                                'alto' => 'table-warning',
+                                                default => ''
+                                            };
+
+                                            $icone = match($evento->tipo) {
+                                                'queda' => 'bi-exclamation-triangle',
+                                                'medicacao' => 'bi-capsule',
+                                                'sintoma' => 'bi-heart-pulse',
+                                                'consulta' => 'bi-hospital',
+                                                'comportamento' => 'bi-person',
+                                                'rotina' => 'bi-calendar-check',
+                                                'outro' => 'bi-journal-text',
+                                                default => 'bi-dot'
+                                            };
+                                        @endphp
+
+                                        <tr class="{{ $linha }}">
+                                            <td class="fw-semibold">
+                                                <i class="bi {{ $icone }} me-1"></i>
+                                                {{ ucfirst($evento->tipo) }}
+                                            </td>
+
+                                            <td class="text-muted">
+                                                {{ $evento->descricao }}
+                                            </td>
+
+                                            <td class="d-none d-md-table-cell">
+                                                <span class="badge {{ $badge }}">
+                                                    {{ ucfirst($nivel) }}
+                                                </span>
+                                            </td>
+
+                                            <td class="text-end text-muted">
+                                                {{ $evento->data_evento ? \Carbon\Carbon::parse($evento->data_evento)->format('H:i') : $evento->created_at->format('H:i') }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-3 d-flex justify-content-end">
+                            <a href="{{ route('eventos.index', ['idoso' => $idoso->id]) }}"
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-list-ul me-1"></i> Ver histórico completo
+                            </a>
+                        </div>
+                    @endif
+
+                </div>
             </div>
         </div>
 
         <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-header bg-danger text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span class="fw-bold">
+            <div class="card-header bg-danger text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2"
+                 data-bs-toggle="collapse"
+                 data-bs-target="#acoesCollapse"
+                 aria-expanded="false"
+                 aria-controls="acoesCollapse"
+                 style="cursor:pointer;">
+
+                <span class="fw-bold d-flex align-items-center gap-2">
                     <i class="bi bi-lightning-charge me-1"></i> Ações rápidas
                 </span>
-                <small class="opacity-75">
-                    Atalhos do tutor para a pessoa acompanhada selecionada
+
+                <small class="opacity-75 d-flex align-items-center">
+                    Atalhos do tutor
+                    <i class="bi bi-chevron-down ms-2 collapse-arrow"></i>
                 </small>
             </div>
 
-            <div class="card-body">
-                <div class="row g-3 text-center">
-                    <div class="col-md-3">
-                        <a href="{{ $idoso->telefone ? 'tel:'.$idoso->telefone : '#' }}"
-                           class="btn btn-primary w-100 {{ $idoso->telefone ? '' : 'disabled' }}">
-                            <i class="bi bi-telephone me-1"></i> Ligar
-                        </a>
-                    </div>
+            <div id="acoesCollapse" class="collapse">
+                <div class="card-body">
+                    <div class="row g-3 text-center">
 
-                    <div class="col-md-3">
-                        <a href="{{ route('medicamentos.index', $idoso->id) }}" class="btn btn-outline-warning w-100">
-                            <i class="bi bi-capsule me-1"></i> Medicamentos
-                        </a>
-                    </div>
+                        <div class="col-md-3">
+                            <a href="{{ $idoso->telefone ? 'tel:'.$idoso->telefone : '#' }}"
+                               class="btn btn-primary w-100 {{ $idoso->telefone ? '' : 'disabled' }}">
+                                <i class="bi bi-telephone me-1"></i> Ligar
+                            </a>
+                        </div>
 
-                    <div class="col-md-3">
-                        <a href="{{ route('eventos.index', $idoso->id) }}" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-bell me-1"></i> Eventos
-                        </a>
-                    </div>
+                        <div class="col-md-3">
+                            <a href="{{ route('medicamentos.index', $idoso->id) }}"
+                               class="btn btn-outline-warning w-100">
+                                <i class="bi bi-capsule me-1"></i> Medicamentos
+                            </a>
+                        </div>
 
-                    <div class="col-md-3">
-                        <a href="{{ route('contatos.index', $idoso->id) }}" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-telephone-forward me-1"></i> Contatos
-                        </a>
+                        <div class="col-md-3">
+                            <a href="{{ route('eventos.index', $idoso->id) }}"
+                               class="btn btn-outline-primary w-100">
+                                <i class="bi bi-bell me-1"></i> Eventos
+                            </a>
+                        </div>
+
+                        <div class="col-md-3">
+                            <a href="{{ route('contatos.index', $idoso->id) }}"
+                               class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-telephone-forward me-1"></i> Contatos
+                            </a>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -460,5 +525,32 @@
     @endif
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function bindCollapseArrow(collapseId) {
+        const header = document.querySelector('[data-bs-target="#' + collapseId + '"]');
+        const collapse = document.getElementById(collapseId);
+
+        if (!header || !collapse) return;
+
+        const icon = header.querySelector('.collapse-arrow');
+        if (!icon) return;
+
+        collapse.addEventListener('show.bs.collapse', function () {
+            icon.classList.remove('bi-chevron-down');
+            icon.classList.add('bi-chevron-up');
+        });
+
+        collapse.addEventListener('hide.bs.collapse', function () {
+            icon.classList.remove('bi-chevron-up');
+            icon.classList.add('bi-chevron-down');
+        });
+    }
+
+    bindCollapseArrow('eventosCollapse');
+    bindCollapseArrow('acoesCollapse');
+});
+</script>
 
 @endsection
