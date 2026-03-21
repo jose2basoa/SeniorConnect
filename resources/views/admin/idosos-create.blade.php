@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5" style="max-width: 980px;">
+<div class="container py-4 py-md-5" style="max-width: 980px;">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Criar cadastro</h2>
             <small class="text-muted">Dados principais da pessoa acompanhada. Informações complementares podem ser adicionadas depois.</small>
@@ -21,13 +21,13 @@
     @endif
 
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+        <div class="card-body p-3 p-md-4">
             <form method="POST" action="{{ route('admin.idosos.store') }}">
                 @csrf
 
                 <div class="row g-3">
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Nome *</label>
                         <input type="text"
                                name="nome"
@@ -39,7 +39,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <label class="form-label fw-bold">Data de nascimento *</label>
                         <input type="date"
                                name="data_nascimento"
@@ -51,7 +51,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <label class="form-label fw-bold">Sexo</label>
                         <select name="sexo" class="form-select @error('sexo') is-invalid @enderror">
                             <option value="">Não informar</option>
@@ -64,7 +64,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">CPF *</label>
                         <input type="text"
                                name="cpf"
@@ -79,7 +79,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">Telefone</label>
                         <input type="text"
                                name="telefone"
@@ -93,7 +93,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">Status inicial</label>
                         <div class="form-control bg-light d-flex align-items-center">
                             <span class="badge bg-secondary">Offline por padrão</span>
@@ -113,7 +113,7 @@
 
                 </div>
 
-                <div class="d-flex justify-content-end mt-4">
+                <div class="d-grid d-md-flex justify-content-md-end mt-4">
                     <button class="btn btn-primary px-4">
                         <i class="bi bi-check2-circle me-1"></i> Criar cadastro
                     </button>

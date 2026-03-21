@@ -1,15 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5">
+<div class="container py-4 py-md-5">
 
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Cadastros de pessoas acompanhadas</h2>
             <small class="text-muted">Gerencie vínculos, acompanhe tutores e organize os registros do sistema.</small>
         </div>
-        <div>
-            <span class="badge bg-primary fs-6">Total: {{ $idosos->count() }}</span>
+
+        <div class="d-grid d-sm-flex gap-2 w-100 w-lg-auto">
+            <span class="badge bg-primary fs-6 px-3 py-2 text-center">Total: {{ $idosos->count() }}</span>
             <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Voltar ao painel
             </a>
@@ -35,69 +36,76 @@
     @endif
 
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+        <div class="card-body p-3 p-md-4">
 
-            <div class="d-flex gap-2 flex-wrap mb-3 align-items-center">
-                <a href="{{ route('admin.idosos.create') }}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle me-1"></i> Novo cadastro
-                </a>
+            <div class="d-flex flex-column gap-3 mb-3">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('admin.idosos.create') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Novo cadastro
+                    </a>
 
-                @if($idosos->isNotEmpty())
-                    <button id="btnToggleSelectIdoso" class="btn btn-outline-primary btn-sm" type="button">
-                        <i class="bi bi-check2-square me-1"></i> Selecionar
-                    </button>
+                    @if($idosos->isNotEmpty())
+                        <button id="btnToggleSelectIdoso" class="btn btn-outline-primary btn-sm" type="button">
+                            <i class="bi bi-check2-square me-1"></i> Selecionar
+                        </button>
 
-                    <button id="btnSelectAllIdosos" class="btn btn-outline-secondary btn-sm d-none" type="button">
-                        Selecionar todos
-                    </button>
+                        <button id="btnSelectAllIdosos" class="btn btn-outline-secondary btn-sm d-none" type="button">
+                            Selecionar todos
+                        </button>
 
-                    <button id="btnClearIdosos" class="btn btn-outline-secondary btn-sm d-none" type="button">
-                        Limpar seleção
-                    </button>
-                @endif
+                        <button id="btnClearIdosos" class="btn btn-outline-secondary btn-sm d-none" type="button">
+                            Limpar seleção
+                        </button>
 
-                <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
-                    <input
-                        type="text"
-                        id="searchIdosos"
-                        class="form-control form-control-sm"
-                        placeholder="Pesquisar por nome, CPF, tutor..."
-                        style="width: 240px;"
-                    >
-
-                    <select id="filterVinculoIdosos" class="form-select form-select-sm" style="width: 170px;">
-                        <option value="all" selected>Todos</option>
-                        <option value="vinculado">Vinculados</option>
-                        <option value="nao-vinculado">Não vinculados</option>
-                    </select>
-
-                    <select id="filterStatusIdosos" class="form-select form-select-sm" style="width: 150px;">
-                        <option value="all" selected>Todos status</option>
-                        <option value="ativo">Ativos</option>
-                        <option value="removido">Removidos</option>
-                    </select>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <label class="small text-muted mb-0">Linhas:</label>
-                        <select id="rowsPerPageIdosos" class="form-select form-select-sm" style="width: 85px;">
-                            <option value="10" selected>10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
+                        <button id="btnDeleteIdosos"
+                                class="btn btn-outline-danger btn-sm d-none"
+                                type="button"
+                                disabled
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalDeleteIdosos">
+                            <i class="bi bi-person-dash me-1"></i> Remover selecionados
+                        </button>
+                    @endif
                 </div>
 
-                @if($idosos->isNotEmpty())
-                    <button id="btnDeleteIdosos"
-                            class="btn btn-outline-danger btn-sm d-none"
-                            type="button"
-                            disabled
-                            data-bs-toggle="modal"
-                            data-bs-target="#modalDeleteIdosos">
-                        <i class="bi bi-person-dash me-1"></i> Remover selecionados
-                    </button>
-                @endif
+                <div class="row g-2">
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <input
+                            type="text"
+                            id="searchIdosos"
+                            class="form-control form-control-sm"
+                            placeholder="Pesquisar por nome, CPF, tutor..."
+                        >
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <select id="filterVinculoIdosos" class="form-select form-select-sm">
+                            <option value="all" selected>Todos</option>
+                            <option value="vinculado">Vinculados</option>
+                            <option value="nao-vinculado">Não vinculados</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <select id="filterStatusIdosos" class="form-select form-select-sm">
+                            <option value="all" selected>Todos status</option>
+                            <option value="ativo">Ativos</option>
+                            <option value="removido">Removidos</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="small text-muted mb-0">Linhas:</label>
+                            <select id="rowsPerPageIdosos" class="form-select form-select-sm">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             @if($idosos->isEmpty())
@@ -105,11 +113,11 @@
                     Nenhum cadastro encontrado no sistema.
                 </div>
             @else
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
                     <small class="text-muted" id="tableInfoIdosos">Mostrando 0 de 0 registros</small>
 
                     <nav aria-label="Paginação de cadastros">
-                        <ul class="pagination pagination-sm mb-0" id="paginationIdosos"></ul>
+                        <ul class="pagination pagination-sm mb-0 flex-wrap" id="paginationIdosos"></ul>
                     </nav>
                 </div>
 

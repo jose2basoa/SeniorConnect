@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5" style="max-width: 980px;">
+<div class="container py-4 py-md-5" style="max-width: 980px;">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Criar usuário</h2>
             <small class="text-muted">
@@ -23,14 +23,14 @@
     @endif
 
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+        <div class="card-body p-3 p-md-4">
 
             <form method="POST" action="{{ route('admin.users.store') }}" novalidate>
                 @csrf
 
                 <div class="row g-3">
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">Nome *</label>
                         <input type="text"
                                name="name"
@@ -40,7 +40,7 @@
                         @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">Sobrenome</label>
                         <input type="text"
                                name="sobrenome"
@@ -49,7 +49,7 @@
                         @error('sobrenome') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">Tipo de usuário *</label>
                         <select name="is_admin" class="form-select @error('is_admin') is-invalid @enderror" required>
                             <option value="0" @selected(old('is_admin', '0') === '0')>Tutor</option>
@@ -58,7 +58,7 @@
                         @error('is_admin') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Email *</label>
                         <input type="email"
                                name="email"
@@ -68,7 +68,7 @@
                         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <label class="form-label fw-bold">CPF *</label>
                         <input type="text"
                                name="cpf"
@@ -81,7 +81,7 @@
                         @error('cpf') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <label class="form-label fw-bold">Telefone *</label>
                         <input type="text"
                                name="telefone"
@@ -94,7 +94,7 @@
                         @error('telefone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <label class="form-label fw-bold">Data de nascimento</label>
                         <input type="date"
                                name="data_nascimento"
@@ -103,7 +103,7 @@
                         @error('data_nascimento') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-6 col-md-3">
                         <label class="form-label fw-bold">CEP</label>
                         <input type="text"
                                name="cep"
@@ -116,7 +116,7 @@
                         @error('cep') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Logradouro</label>
                         <input type="text"
                                name="logradouro"
@@ -125,7 +125,7 @@
                         @error('logradouro') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-4 col-md-2">
                         <label class="form-label fw-bold">Número</label>
                         <input type="text"
                                name="numero"
@@ -134,7 +134,7 @@
                         @error('numero') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-sm-8 col-md-4">
                         <label class="form-label fw-bold">Bairro</label>
                         <input type="text"
                                name="bairro"
@@ -143,7 +143,7 @@
                         @error('bairro') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">Cidade</label>
                         <input type="text"
                                name="cidade"
@@ -152,7 +152,7 @@
                         @error('cidade') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-4 col-md-2">
                         <label class="form-label fw-bold">Estado</label>
                         <input type="text"
                                name="estado"
@@ -162,7 +162,7 @@
                         @error('estado') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-sm-8 col-md-6">
                         <label class="form-label fw-bold">Complemento</label>
                         <input type="text"
                                name="complemento"
@@ -171,7 +171,7 @@
                         @error('complemento') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Senha *</label>
                         <input type="password"
                                name="password"
@@ -180,7 +180,7 @@
                         @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Confirmar senha *</label>
                         <input type="password"
                                name="password_confirmation"
@@ -192,7 +192,7 @@
 
                 <hr class="my-4">
 
-                <div class="d-flex justify-content-end">
+                <div class="d-grid d-md-flex justify-content-md-end">
                     <button class="btn btn-primary px-4">
                         <i class="bi bi-check2-circle me-1"></i> Criar usuário
                     </button>

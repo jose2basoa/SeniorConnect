@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5">
+<div class="container py-4 py-md-5">
 
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+    <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Painel Administrativo</h2>
             <small class="text-muted">
@@ -11,7 +11,7 @@
             </small>
         </div>
 
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-grid d-sm-flex gap-2 w-100 w-lg-auto">
             <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
                 <i class="bi bi-person-plus me-1"></i> Novo usuário
             </a>
@@ -24,14 +24,14 @@
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
+    <div class="row g-3 g-md-4 mb-4">
 
-        <div class="col-md-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <button type="button"
-                    class="card shadow-sm border-0 bg-primary text-white w-100 text-start p-0 js-filter ring-active rounded-4"
+                    class="card shadow-sm border-0 bg-primary text-white w-100 text-start p-0 js-filter ring-active rounded-4 h-100"
                     data-filter="users">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
                         <div>
                             <div class="opacity-75 small">Total de usuários</div>
                             <div class="fs-2 fw-bold">{{ $totalUsers }}</div>
@@ -40,17 +40,17 @@
                             <i class="bi bi-people"></i>
                         </div>
                     </div>
-                    <small class="opacity-75">Visualizar usuários recentes</small>
+                    <small class="opacity-75 d-block mt-2">Visualizar usuários recentes</small>
                 </div>
             </button>
         </div>
 
-        <div class="col-md-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <button type="button"
-                    class="card shadow-sm border-0 bg-warning text-dark w-100 text-start p-0 js-filter rounded-4"
+                    class="card shadow-sm border-0 bg-warning text-dark w-100 text-start p-0 js-filter rounded-4 h-100"
                     data-filter="idosos">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
                         <div>
                             <div class="opacity-75 small">Total de Tutorados</div>
                             <div class="fs-2 fw-bold">{{ $totalIdosos }}</div>
@@ -59,17 +59,17 @@
                             <i class="bi bi-person-hearts"></i>
                         </div>
                     </div>
-                    <small class="opacity-75">Visualizar tutorados recentes</small>
+                    <small class="opacity-75 d-block mt-2">Visualizar tutorados recentes</small>
                 </div>
             </button>
         </div>
 
-        <div class="col-md-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <button type="button"
-                    class="card shadow-sm border-0 bg-success text-white w-100 text-start p-0 js-filter rounded-4"
+                    class="card shadow-sm border-0 bg-success text-white w-100 text-start p-0 js-filter rounded-4 h-100"
                     data-filter="tutores">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
                         <div>
                             <div class="opacity-75 small">Tutores</div>
                             <div class="fs-2 fw-bold">{{ $totalTutores }}</div>
@@ -78,17 +78,17 @@
                             <i class="bi bi-person-check"></i>
                         </div>
                     </div>
-                    <small class="opacity-75">Usuários sem privilégio admin</small>
+                    <small class="opacity-75 d-block mt-2">Usuários sem privilégio admin</small>
                 </div>
             </button>
         </div>
 
-        <div class="col-md-6 col-xl-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <button type="button"
-                    class="card shadow-sm border-0 bg-danger text-white w-100 text-start p-0 js-filter rounded-4"
+                    class="card shadow-sm border-0 bg-danger text-white w-100 text-start p-0 js-filter rounded-4 h-100"
                     data-filter="admins">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
                         <div>
                             <div class="opacity-75 small">Administradores</div>
                             <div class="fs-2 fw-bold">{{ $totalAdmins }}</div>
@@ -97,16 +97,16 @@
                             <i class="bi bi-shield-lock"></i>
                         </div>
                     </div>
-                    <small class="opacity-75">Usuários com acesso total</small>
+                    <small class="opacity-75 d-block mt-2">Usuários com acesso total</small>
                 </div>
             </button>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
+    <div class="row g-3 g-md-4 mb-4">
+        <div class="col-12 col-lg-6">
             <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center gap-3">
                     <div>
                         <div class="text-muted">Cadastros vinculados</div>
                         <div class="fs-2 fw-bold">{{ $idososComTutor ?? 0 }}</div>
@@ -119,9 +119,9 @@
             </div>
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
             <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center gap-3">
                     <div>
                         <div class="text-muted">Cadastros sem vínculo</div>
                         <div class="fs-2 fw-bold">{{ $idososSemTutor ?? 0 }}</div>
@@ -136,13 +136,13 @@
     </div>
 
     <div class="card shadow-sm border-0 rounded-4 mb-4">
-        <div class="card-header bg-light rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="card-header bg-light rounded-top-4 p-3 p-md-4 d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
             <div>
                 <div class="fw-bold" id="list-title">Usuários recentes</div>
                 <small class="text-muted">Listagem dinâmica por categoria</small>
             </div>
 
-            <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="d-flex flex-wrap align-items-center gap-2 w-100 w-lg-auto">
                 <label class="small text-muted mb-0">Linhas:</label>
                 <select id="rowsPerPage" class="form-select form-select-sm" style="width: 85px;">
                     <option value="10" selected>10</option>
@@ -163,11 +163,11 @@
             </div>
         </div>
 
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
                 <small class="text-muted" id="table-info">Mostrando 0 de 0 registros</small>
                 <nav aria-label="Paginação da tabela">
-                    <ul class="pagination pagination-sm mb-0" id="table-pagination"></ul>
+                    <ul class="pagination pagination-sm mb-0 flex-wrap" id="table-pagination"></ul>
                 </nav>
             </div>
 
@@ -258,11 +258,11 @@
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-lg-6">
+    <div class="row g-3 g-md-4">
+        <div class="col-12 col-lg-6">
             <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                         <h5 class="fw-bold mb-0">Cadastros de usuários</h5>
                         <small class="text-muted">Últimos 14 dias</small>
                     </div>
@@ -271,10 +271,10 @@
             </div>
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
             <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                         <h5 class="fw-bold mb-0">Cadastros de idosos</h5>
                         <small class="text-muted">Últimos 14 dias</small>
                     </div>
@@ -349,12 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.innerHTML = `<button class="page-link" type="button">${label}</button>`;
                 li.addEventListener('click', () => {
                     currentPage = page;
-
-                    if (typeof updateTable === 'function') {
-                        updateTable();
-                    } else if (typeof updateCards === 'function') {
-                        updateCards();
-                    }
+                    updateTable();
                 });
             }
 
