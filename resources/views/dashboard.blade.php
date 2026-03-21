@@ -478,15 +478,29 @@
         </div>
 
         @if(isset($idosos) && $idosos->count() > 1 && $idoso)
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-3 p-md-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0">
+
+            <div style="
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 1050;
+                background: rgba(255,255,255,0.96);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid rgba(0,0,0,0.08);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            ">
+
+                <div class="container py-2 py-md-3">
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0 text-muted text-uppercase small">
                             <i class="bi bi-people me-2"></i>Pessoas acompanhadas
-                        </h5>
+                        </h6>
                     </div>
 
                     <div class="d-flex flex-nowrap gap-3 overflow-auto pb-2">
+
                         @foreach($idosos as $pessoa)
                             @php
                                 $ativo = isset($idosoSelecionado) && $idosoSelecionado && $idosoSelecionado->id === $pessoa->id;
@@ -494,12 +508,12 @@
                             @endphp
 
                             <a href="{{ route('dashboard', ['idoso' => $pessoa->id]) }}"
-                               class="card border-0 shadow-sm text-decoration-none flex-shrink-0 rounded-4 {{ $ativo ? 'bg-primary text-white' : 'bg-white text-dark' }}"
-                               style="width: 240px; min-width: 240px;">
+                            class="card border-0 shadow-sm text-decoration-none flex-shrink-0 rounded-4 {{ $ativo ? 'bg-primary text-white' : 'bg-white text-dark' }}"
+                            style="width: 240px; min-width: 240px;">
 
                                 <div class="card-body d-flex align-items-center gap-3 p-3">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden {{ $ativo ? 'bg-white text-primary' : 'bg-primary-subtle text-primary' }}"
-                                         style="width: 52px; height: 52px; min-width: 52px;">
+                                        style="width: 52px; height: 52px; min-width: 52px;">
                                         <span class="fw-bold fs-5">
                                             {{ strtoupper(mb_substr($pessoa->nome, 0, 1)) }}
                                         </span>
@@ -516,10 +530,16 @@
                                     </div>
                                 </div>
                             </a>
+
                         @endforeach
+
                     </div>
                 </div>
             </div>
+
+            {{-- Espaço para não esconder conteúdo --}}
+            <div style="height: 130px;"></div>
+
         @endif
 
     @endif
