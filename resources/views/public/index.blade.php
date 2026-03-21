@@ -3,66 +3,84 @@
 @section('content')
 
 <!-- HERO -->
-<section class="py-5 bg-light">
+<section class="py-4 py-md-5 bg-light">
     <div class="container">
-        <div class="row align-items-center g-5">
+        <div class="row align-items-center g-4 g-lg-5">
 
-            <div class="col-lg-6">
-                <span class="badge bg-primary-subtle text-primary mb-3 px-3 py-2 rounded-pill">
-                    Segurança e cuidado em tempo real
-                </span>
+            <div class="col-12 col-lg-6 order-2 order-lg-1">
+                <div class="text-center text-lg-start">
+                    <span class="badge bg-primary-subtle text-primary mb-3 px-3 py-2 rounded-pill">
+                        Segurança e cuidado em tempo real
+                    </span>
 
-                <h1 class="display-5 fw-bold mb-3">
-                    Um painel claro, moderno e prático para acompanhar quem mais importa.
-                </h1>
+                    <h1 class="fw-bold mb-3 lh-sm fs-2 fs-md-1">
+                        Um painel claro, moderno e prático para acompanhar quem mais importa.
+                    </h1>
 
-                <p class="lead text-muted mb-4">
-                    O Sênior Conecta reúne alertas, medicamentos, eventos, contatos e status de monitoramento
-                    em um só lugar, facilitando a rotina de familiares, cuidadores e tutores.
-                </p>
+                    <p class="text-muted mb-4 fs-6 fs-md-5">
+                        O Sênior Conecta reúne alertas, medicamentos, eventos, contatos e status de monitoramento
+                        em um só lugar, facilitando a rotina de familiares, cuidadores e tutores.
+                    </p>
 
-                <div class="d-flex flex-wrap gap-2">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg px-4">
-                            Acessar meu painel
-                        </a>
-                    @else
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-4">
-                            Criar conta grátis
-                        </a>
-                        <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-lg px-4">
-                            Já tenho conta
-                        </a>
-                    @endauth
-                </div>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-center justify-content-lg-start flex-wrap">
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg px-4">
+                                Acessar meu painel
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-4">
+                                Criar conta grátis
+                            </a>
+                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-lg px-4">
+                                Já tenho conta
+                            </a>
+                        @endauth
+                    </div>
 
-                <div class="d-flex flex-wrap gap-3 mt-4 text-muted">
-                    <small><i class="bi bi-lightning-charge me-1"></i> Alertas rápidos</small>
-                    <small><i class="bi bi-capsule-pill me-1"></i> Controle de medicamentos</small>
-                    <small><i class="bi bi-journal-text me-1"></i> Histórico de eventos</small>
-                    <small><i class="bi bi-people me-1"></i> Contatos úteis</small>
+                    <div class="row row-cols-1 row-cols-sm-2 g-2 mt-4 text-muted small">
+                        <div class="col">
+                            <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                                <i class="bi bi-lightning-charge me-2"></i> Alertas rápidos
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                                <i class="bi bi-capsule-pill me-2"></i> Controle de medicamentos
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                                <i class="bi bi-journal-text me-2"></i> Histórico de eventos
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
+                                <i class="bi bi-people me-2"></i> Contatos úteis
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-lg-6">
-                <div class="position-relative">
+            <div class="col-12 col-lg-6 order-1 order-lg-2">
+                <div class="position-relative mx-auto" style="max-width: 680px;">
                     <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                         <div class="card-body p-2 p-md-3 bg-white">
-                            <img 
-                                src="{{ asset('media/Dashboard.png') }}" 
+                            <img
+                                src="{{ asset('media/Dashboard.png') }}"
                                 alt="Dashboard do Sênior Conecta"
                                 class="img-fluid rounded-4 w-100"
                             >
                         </div>
                     </div>
 
-                    <div class="position-absolute top-0 end-0 translate-middle-y me-3 mt-4 d-none d-md-block">
+                    <div class="mt-3 d-none d-md-flex justify-content-between gap-2 position-absolute top-0 start-0 end-0 px-3 pt-3">
                         <span class="badge rounded-pill bg-white text-dark shadow-sm border px-3 py-2">
                             <i class="bi bi-shield-check text-primary me-1"></i> Interface real do sistema
                         </span>
                     </div>
 
-                    <div class="position-absolute bottom-0 end-0 translate-middle-y me-3 d-none d-md-block">
+                    <div class="mt-3 d-none d-md-flex justify-content-end position-absolute bottom-0 start-0 end-0 px-3 pb-3">
                         <span class="badge rounded-pill bg-primary px-3 py-2 shadow-sm">
                             <i class="bi bi-activity me-1"></i> Monitoramento centralizado
                         </span>
@@ -75,17 +93,17 @@
 </section>
 
 <!-- BENEFÍCIOS -->
-<section id="beneficios" class="py-5">
+<section id="beneficios" class="py-4 py-md-5">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4 mb-md-5">
             <h2 class="fw-bold">Benefícios pensados para o dia a dia</h2>
-            <p class="text-muted col-md-8 mx-auto">
+            <p class="text-muted mx-auto col-12 col-md-10 col-lg-8">
                 A ideia é reduzir ansiedade, agilizar decisões e trazer mais tranquilidade para quem cuida.
             </p>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-4">
+        <div class="row g-3 g-md-4">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
                         <div class="mb-3 fs-3 text-primary"><i class="bi bi-shield-check"></i></div>
@@ -97,7 +115,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
                         <div class="mb-3 fs-3 text-primary"><i class="bi bi-activity"></i></div>
@@ -109,7 +127,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
                         <div class="mb-3 fs-3 text-primary"><i class="bi bi-clock-history"></i></div>
@@ -125,17 +143,17 @@
 </section>
 
 <!-- FUNCIONALIDADES -->
-<section id="funcionalidades" class="bg-light py-5">
+<section id="funcionalidades" class="bg-light py-4 py-md-5">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4 mb-md-5">
             <h2 class="fw-bold">Funcionalidades principais</h2>
-            <p class="text-muted col-md-8 mx-auto">
+            <p class="text-muted mx-auto col-12 col-md-10 col-lg-8">
                 Tudo em um painel simples para monitorar, registrar e agir.
             </p>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-4">
+        <div class="row g-3 g-md-4">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="card shadow border-0 h-100 rounded-4">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 text-primary mb-2"><i class="bi bi-speedometer2"></i></div>
@@ -145,7 +163,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="card shadow border-0 h-100 rounded-4">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 text-primary mb-2"><i class="bi bi-exclamation-triangle"></i></div>
@@ -155,7 +173,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12 col-md-6 col-lg-4">
                 <div class="card shadow border-0 h-100 rounded-4">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 text-primary mb-2"><i class="bi bi-geo-alt"></i></div>
@@ -165,34 +183,33 @@
                 </div>
             </div>
         </div>
-
     </div>
 </section>
 
 <!-- COMO FUNCIONA -->
-<section id="como-funciona" class="py-5">
+<section id="como-funciona" class="py-4 py-md-5">
     <div class="container text-center">
-        <h2 class="fw-bold mb-5">Como funciona</h2>
+        <h2 class="fw-bold mb-4 mb-md-5">Como funciona</h2>
 
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="p-4 border rounded-4 h-100">
+        <div class="row g-3 g-md-4">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 border rounded-4 h-100 bg-white">
                     <div class="fs-2 text-primary mb-2">1</div>
                     <h5 class="fw-bold">Cadastro e vínculo</h5>
                     <p class="text-muted mb-0">Tutor cria conta e vincula o perfil acompanhado com segurança.</p>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="p-4 border rounded-4 h-100">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 border rounded-4 h-100 bg-white">
                     <div class="fs-2 text-primary mb-2">2</div>
                     <h5 class="fw-bold">Monitoramento</h5>
                     <p class="text-muted mb-0">Eventos e rotinas ficam registrados e visíveis no painel.</p>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="p-4 border rounded-4 h-100">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="p-4 border rounded-4 h-100 bg-white">
                     <div class="fs-2 text-primary mb-2">3</div>
                     <h5 class="fw-bold">Ação rápida</h5>
                     <p class="text-muted mb-0">Em situação de risco, o tutor recebe alertas e pode agir.</p>
@@ -203,15 +220,15 @@
 </section>
 
 <!-- DEPOIMENTOS -->
-<section id="depoimentos" class="bg-light py-5">
+<section id="depoimentos" class="bg-light py-4 py-md-5">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4 mb-md-5">
             <span class="badge bg-primary-subtle text-primary mb-3 px-3 py-2 rounded-pill">
                 Relatos e participação da comunidade
             </span>
 
             <h2 class="fw-bold">Comentários aprovados e espaço para contribuição</h2>
-            <p class="text-muted col-md-8 mx-auto">
+            <p class="text-muted mx-auto col-12 col-md-10 col-lg-8">
                 Comentários enviados pelos usuários passam por validação antes de aparecer publicamente,
                 mantendo a área mais organizada, confiável e alinhada com a proposta do projeto.
             </p>
@@ -235,64 +252,9 @@
         @endif
 
         <div class="row g-4 align-items-stretch">
-            <div class="col-lg-7">
-                <div class="row g-4">
-                    @forelse($comentarios as $comentario)
-                        <div class="col-md-6">
-                            <div class="card shadow-sm border-0 rounded-4 h-100">
-                                <div class="card-body p-4 d-flex flex-column">
-                                    <div class="d-flex align-items-center gap-3 mb-3">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold"
-                                             style="width: 54px; height: 54px; font-size: 1.05rem;">
-                                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($comentario->nome_publico, 0, 1)) }}
-                                        </div>
-
-                                        <div>
-                                            <div class="fw-bold">{{ $comentario->nome_publico }}</div>
-                                            <small class="text-muted">
-                                                {{ $comentario->cargo ?: 'Usuário da plataforma' }}
-                                            </small>
-                                        </div>
-                                    </div>
-
-                                    <p class="text-muted mb-4 flex-grow-1">
-                                        “{{ $comentario->comentario }}”
-                                    </p>
-
-                                    <div class="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
-                                        <small class="text-muted">
-                                            Publicado em
-                                            {{ optional($comentario->aprovado_em ?? $comentario->created_at)->format('d/m/Y') }}
-                                        </small>
-
-                                        <span class="badge rounded-pill text-bg-light border">
-                                            <i class="bi bi-patch-check text-primary me-1"></i> Validado
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-12">
-                            <div class="card border-0 shadow-sm rounded-4">
-                                <div class="card-body p-4 p-lg-5 text-center">
-                                    <div class="fs-1 text-primary mb-3">
-                                        <i class="bi bi-chat-square-quote"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-2">Nenhum comentário público ainda</h5>
-                                    <p class="text-muted mb-0">
-                                        Os primeiros comentários aprovados aparecerão aqui assim que forem validados pela equipe.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <div class="col-lg-5">
+            <div class="col-12 col-lg-5 order-1 order-lg-2">
                 <div class="card border-0 shadow rounded-4 h-100">
-                    <div class="card-body p-4 p-lg-4">
+                    <div class="card-body p-4">
                         <div class="d-flex align-items-start gap-3 mb-3">
                             <div class="fs-3 text-primary">
                                 <i class="bi bi-pencil-square"></i>
@@ -370,7 +332,7 @@
                                     Para enviar um comentário, é preciso estar logado na plataforma.
                                 </p>
 
-                                <div class="d-flex flex-wrap gap-2">
+                                <div class="d-grid gap-2 d-sm-flex flex-wrap">
                                     <a href="{{ route('login') }}" class="btn btn-primary">
                                         Entrar
                                     </a>
@@ -406,24 +368,77 @@
                     </div>
                 </div>
             </div>
-        </div>
 
+            <div class="col-12 col-lg-7 order-2 order-lg-1">
+                <div class="row g-3 g-md-4">
+                    @forelse($comentarios as $comentario)
+                        <div class="col-12 col-md-6">
+                            <div class="card shadow-sm border-0 rounded-4 h-100">
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                                             style="width: 54px; height: 54px; font-size: 1.05rem;">
+                                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($comentario->nome_publico, 0, 1)) }}
+                                        </div>
+
+                                        <div class="min-w-0">
+                                            <div class="fw-bold text-break">{{ $comentario->nome_publico }}</div>
+                                            <small class="text-muted">
+                                                {{ $comentario->cargo ?: 'Usuário da plataforma' }}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-muted mb-4 flex-grow-1">
+                                        “{{ $comentario->comentario }}”
+                                    </p>
+
+                                    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mt-auto pt-2 border-top">
+                                        <small class="text-muted">
+                                            Publicado em
+                                            {{ optional($comentario->aprovado_em ?? $comentario->created_at)->format('d/m/Y') }}
+                                        </small>
+
+                                        <span class="badge rounded-pill text-bg-light border">
+                                            <i class="bi bi-patch-check text-primary me-1"></i> Validado
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-body p-4 p-lg-5 text-center">
+                                    <div class="fs-1 text-primary mb-3">
+                                        <i class="bi bi-chat-square-quote"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Nenhum comentário público ainda</h5>
+                                    <p class="text-muted mb-0">
+                                        Os primeiros comentários aprovados aparecerão aqui assim que forem validados pela equipe.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 <!-- FAQ -->
-<section id="faq" class="py-5">
+<section id="faq" class="py-4 py-md-5">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4 mb-md-5">
             <h2 class="fw-bold">Dúvidas comuns</h2>
-            <p class="text-muted col-md-8 mx-auto">
+            <p class="text-muted mx-auto col-12 col-md-10 col-lg-8">
                 Respostas rápidas para entender o funcionamento e o que esperar do sistema.
             </p>
         </div>
 
         <div class="accordion accordion-flush" id="faqAccordion">
 
-            <!-- 1 -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="h1">
                     <button class="accordion-button collapsed" type="button"
@@ -442,7 +457,6 @@
                 </div>
             </div>
 
-            <!-- 2 -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="h2">
                     <button class="accordion-button collapsed" type="button"
@@ -461,7 +475,6 @@
                 </div>
             </div>
 
-            <!-- 3 -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="h3">
                     <button class="accordion-button collapsed" type="button"
@@ -481,7 +494,6 @@
                 </div>
             </div>
 
-            <!-- 4 -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="h4">
                     <button class="accordion-button collapsed" type="button"
@@ -500,7 +512,6 @@
                 </div>
             </div>
 
-            <!-- 5 -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="h5">
                     <button class="accordion-button collapsed" type="button"
@@ -526,7 +537,7 @@
 </section>
 
 <!-- CTA FINAL -->
-<section class="bg-primary text-white text-center py-5">
+<section class="bg-primary text-white text-center py-4 py-md-5">
     <div class="container">
         @auth
             <h3 class="fw-bold mb-3">

@@ -7,13 +7,13 @@
     $horaAgora = \Carbon\Carbon::now()->format('H:i');
 @endphp
 
-<div class="container py-5">
+<div class="container py-4 py-md-5">
 
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
         <div>
             <h3 class="mb-1 fw-bold">Painel de Monitoramento</h3>
 
-            <div class="text-muted">
+            <div class="text-muted small small-md-base">
                 <i class="bi bi-calendar3 me-1"></i> {{ $hoje }}
                 <span class="mx-2">•</span>
                 <i class="bi bi-clock me-1"></i> {{ $horaAgora }}
@@ -26,9 +26,9 @@
             @endauth
         </div>
 
-        <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="d-grid d-sm-flex align-items-stretch align-items-sm-center gap-2 w-100 w-lg-auto">
             @if($idoso)
-                <span class="badge {{ $alertas > 0 ? 'bg-danger' : 'bg-success' }} fs-6">
+                <span class="badge {{ $alertas > 0 ? 'bg-danger' : 'bg-success' }} fs-6 px-3 py-2 text-center">
                     <i class="bi {{ $alertas > 0 ? 'bi-exclamation-triangle' : 'bi-check-circle' }} me-1"></i>
                     {{ $alertas > 0 ? "$alertas alertas ativos" : 'Sem alertas' }}
                 </span>
@@ -59,9 +59,9 @@
         @endphp
 
         <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="card-body p-3 p-md-4 d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
+                <div class="w-100">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                         <h4 class="fw-bold mb-0">{{ $idoso->nome }}</h4>
 
                         @if(!is_null($idade))
@@ -76,7 +76,7 @@
                         </span>
                     </div>
 
-                    <small class="text-muted d-block mt-1">
+                    <small class="text-muted d-block">
                         @if($idoso->ultima_atividade)
                             Última atividade às
                             <span class="fw-semibold">
@@ -88,7 +88,7 @@
                     </small>
                 </div>
 
-                <div class="d-flex gap-2 flex-wrap">
+                <div class="w-100 w-lg-auto d-grid d-sm-flex gap-2">
                     <a href="{{ route('idosos.show', $idoso->id) }}" class="btn btn-outline-primary">
                         <i class="bi bi-person-badge me-1"></i> Dados pessoais
                     </a>
@@ -109,19 +109,19 @@
                 </p>
 
                 <div class="row g-3 justify-content-center mb-4">
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <div class="p-3 border rounded-4 h-100">
                             <div class="fw-bold mb-1">1) Cadastre</div>
                             <div class="text-muted small">Informe os dados principais da pessoa acompanhada.</div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <div class="p-3 border rounded-4 h-100">
                             <div class="fw-bold mb-1">2) Vincule</div>
                             <div class="text-muted small">Associe o cadastro ao seu perfil com segurança.</div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <div class="p-3 border rounded-4 h-100">
                             <div class="fw-bold mb-1">3) Monitore</div>
                             <div class="text-muted small">Acompanhe alertas, rotina e informações importantes.</div>
@@ -143,9 +143,9 @@
 
     @else
 
-        <div class="row g-4 mb-4">
+        <div class="row g-3 g-md-4 mb-4">
 
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm border-0 rounded-4 h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 {{ $idoso->status_online ? 'text-success' : 'text-danger' }}">
@@ -165,7 +165,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm border-0 rounded-4 h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 {{ $alertas > 0 ? 'text-danger' : 'text-success' }}">
@@ -182,7 +182,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm border-0 rounded-4 h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 text-primary">
@@ -208,7 +208,7 @@
                             $longitude = $ultimaLocalizacao->longitude ?? null;
                         @endphp
 
-                        <div class="mt-3">
+                        <div class="mt-3 d-grid">
                             @if($latitude && $longitude)
                                 <a class="btn btn-outline-primary btn-sm"
                                    target="_blank"
@@ -225,7 +225,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card shadow-sm border-0 rounded-4 h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 text-warning">
@@ -260,23 +260,23 @@
                             @endif
                         </div>
 
-                        <div class="mt-3">
+                        <div class="mt-3 d-grid">
                             @if($proximoMedicamento)
                                 @if(!$proximoMedicamento->tomado)
                                     <form action="{{ route('medicamentos.toggleTomado', [$idoso->id, $proximoMedicamento->id]) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="btn btn-outline-warning btn-sm rounded-3">
+                                        <button type="submit" class="btn btn-outline-warning btn-sm rounded-3 w-100">
                                             <i class="bi bi-check2-circle me-1"></i> Marcar como tomado
                                         </button>
                                     </form>
                                 @else
-                                    <button class="btn btn-outline-secondary btn-sm rounded-3" disabled>
+                                    <button class="btn btn-outline-secondary btn-sm rounded-3 w-100" disabled>
                                         <i class="bi bi-check2-circle me-1"></i> Já marcado como tomado
                                     </button>
                                 @endif
                             @else
-                                <button class="btn btn-outline-secondary btn-sm rounded-3" disabled>
+                                <button class="btn btn-outline-secondary btn-sm rounded-3 w-100" disabled>
                                     <i class="bi bi-check2-circle me-1"></i> Sem agendamentos
                                 </button>
                             @endif
@@ -294,15 +294,15 @@
                 $alertasCriticos = $ultimosEventos->where('nivel', 'critico')->count();
             @endphp
 
-            <div class="card-header bg-primary text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2"
+            <div class="card-header bg-primary text-white rounded-top-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2"
                  data-bs-toggle="collapse"
                  data-bs-target="#eventosCollapse"
                  aria-expanded="false"
                  aria-controls="eventosCollapse"
                  style="cursor:pointer;">
 
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <span class="fw-bold d-flex align-items-center gap-2">
+                <div class="d-flex align-items-start align-items-md-center gap-2 flex-wrap">
+                    <span class="fw-bold d-flex align-items-center gap-2 flex-wrap">
                         <i class="bi bi-bell"></i>
                         Últimos eventos
 
@@ -337,7 +337,7 @@
             </div>
 
             <div id="eventosCollapse" class="collapse">
-                <div class="card-body">
+                <div class="card-body p-3 p-md-4">
 
                     @if($ultimosEventos->isEmpty())
                         <div class="text-muted">
@@ -386,7 +386,7 @@
                                         @endphp
 
                                         <tr class="{{ $linha }}">
-                                            <td class="fw-semibold">
+                                            <td class="fw-semibold text-nowrap">
                                                 <i class="bi {{ $icone }} me-1"></i>
                                                 {{ ucfirst($evento->tipo) }}
                                             </td>
@@ -401,7 +401,7 @@
                                                 </span>
                                             </td>
 
-                                            <td class="text-end text-muted">
+                                            <td class="text-end text-muted text-nowrap">
                                                 {{ $evento->data_evento ? \Carbon\Carbon::parse($evento->data_evento)->format('H:i') : $evento->created_at->format('H:i') }}
                                             </td>
                                         </tr>
@@ -410,7 +410,7 @@
                             </table>
                         </div>
 
-                        <div class="mt-3 d-flex justify-content-end">
+                        <div class="mt-3 d-grid d-md-flex justify-content-md-end">
                             <a href="{{ route('eventos.index', ['idoso' => $idoso->id]) }}"
                                class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-list-ul me-1"></i> Ver histórico completo
@@ -423,7 +423,7 @@
         </div>
 
         <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-header bg-danger text-white rounded-top-4 d-flex justify-content-between align-items-center flex-wrap gap-2"
+            <div class="card-header bg-danger text-white rounded-top-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2"
                  data-bs-toggle="collapse"
                  data-bs-target="#acoesCollapse"
                  aria-expanded="false"
@@ -441,31 +441,31 @@
             </div>
 
             <div id="acoesCollapse" class="collapse">
-                <div class="card-body">
+                <div class="card-body p-3 p-md-4">
                     <div class="row g-3 text-center">
 
-                        <div class="col-md-3">
+                        <div class="col-12 col-sm-6 col-xl-3">
                             <a href="{{ $idoso->telefone ? 'tel:'.$idoso->telefone : '#' }}"
                                class="btn btn-primary w-100 {{ $idoso->telefone ? '' : 'disabled' }}">
                                 <i class="bi bi-telephone me-1"></i> Ligar
                             </a>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-12 col-sm-6 col-xl-3">
                             <a href="{{ route('medicamentos.index', $idoso->id) }}"
                                class="btn btn-outline-warning w-100">
                                 <i class="bi bi-capsule me-1"></i> Medicamentos
                             </a>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-12 col-sm-6 col-xl-3">
                             <a href="{{ route('eventos.index', $idoso->id) }}"
                                class="btn btn-outline-primary w-100">
                                 <i class="bi bi-bell me-1"></i> Eventos
                             </a>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-12 col-sm-6 col-xl-3">
                             <a href="{{ route('contatos.index', $idoso->id) }}"
                                class="btn btn-outline-secondary w-100">
                                 <i class="bi bi-telephone-forward me-1"></i> Contatos
@@ -479,7 +479,7 @@
 
         @if(isset($idosos) && $idosos->count() > 1 && $idoso)
             <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-3">
+                <div class="card-body p-3 p-md-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold mb-0">
                             <i class="bi bi-people me-2"></i>Pessoas acompanhadas
