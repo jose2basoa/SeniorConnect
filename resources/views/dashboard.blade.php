@@ -11,7 +11,7 @@
 
     <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
         <div>
-            <h3 class="mb-1 fw-bold">Painel de Monitoramento</h3>
+            <h3 class="mb-1 fw-bold">Painel de Monitoramento "https://excalidraw.com/#json=G3NtyNszeKMBTnWhelicH,ggbmPxvkO7maygfKDVpAbw"</h3>
 
             <div class="text-muted small small-md-base">
                 <i class="bi bi-calendar3 me-1"></i> {{ $hoje }}
