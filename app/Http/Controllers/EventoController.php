@@ -11,6 +11,7 @@ class EventoController extends Controller
     private function buscarIdosoPermitido(int $idosoId): Idoso
     {
         $user = auth()->user();
+        abort_unless($user, 401);
 
         $idoso = Idoso::with('users')->findOrFail($idosoId);
 
@@ -31,9 +32,9 @@ class EventoController extends Controller
         ]);
     }
 
-    public function create(Idoso $idoso)
+    public function create($idosoId)
     {
-        $idoso = $this->buscarIdosoPermitido($idoso->id);
+        $idoso = $this->buscarIdosoPermitido((int) $idosoId);
 
         return view('eventos.create', compact('idoso'));
     }
@@ -67,7 +68,7 @@ class EventoController extends Controller
     {
         $idoso = $this->buscarIdosoPermitido($idoso->id);
 
-        abort_unless($evento->idoso_id === $idoso->id, 404);
+        abort_unless((int) $evento->idoso_id === (int) $idoso->id, 404);
 
         return view('eventos.edit', compact('idoso', 'evento'));
     }
@@ -76,7 +77,7 @@ class EventoController extends Controller
     {
         $idoso = $this->buscarIdosoPermitido($idoso->id);
 
-        abort_unless($evento->idoso_id === $idoso->id, 404);
+        abort_unless((int) $evento->idoso_id === (int) $idoso->id, 404);
 
         $dados = $request->validate([
             'tipo' => ['required', 'in:queda,medicacao,sintoma,rotina,consulta,comportamento,outro'],
@@ -92,6 +93,7 @@ class EventoController extends Controller
         $dados['origem'] = $dados['origem'] ?? 'manual';
         $dados['resolvido'] = $resolvido;
         $dados['resolvido_em'] = $resolvido ? ($evento->resolvido_em ?? now()) : null;
+        $dados['data_evento'] = $dados['data_evento'] ?? $evento->data_evento ?? now();
 
         $evento->update($dados);
 
@@ -104,7 +106,7 @@ class EventoController extends Controller
     {
         $idoso = $this->buscarIdosoPermitido($idoso->id);
 
-        abort_unless($evento->idoso_id === $idoso->id, 404);
+        abort_unless((int) $evento->idoso_id === (int) $idoso->id, 404);
 
         $evento->delete();
 
@@ -117,7 +119,7 @@ class EventoController extends Controller
     {
         $idoso = $this->buscarIdosoPermitido($idoso->id);
 
-        abort_unless($evento->idoso_id === $idoso->id, 404);
+        abort_unless((int) $evento->idoso_id === (int) $idoso->id, 404);
 
         $novoStatus = !$evento->resolvido;
 

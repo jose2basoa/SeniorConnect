@@ -51,6 +51,11 @@ class IdosoController extends Controller
 
     public function storeStep1(Request $request, Idoso $idoso = null)
     {
+        $request->merge([
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
+        ]);
+
         $idosoId = $idoso?->id;
 
         $request->validate([
@@ -59,10 +64,10 @@ class IdosoController extends Controller
             'sexo' => ['nullable', 'string', 'max:20'],
             'cpf' => [
                 'required',
-                'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/',
+                'digits:11',
                 Rule::unique('idosos', 'cpf')->ignore($idosoId),
             ],
-            'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'telefone' => ['nullable', 'digits_between:10,11'],
             'observacoes' => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -70,8 +75,8 @@ class IdosoController extends Controller
             'nome' => $request->nome,
             'data_nascimento' => $request->data_nascimento,
             'sexo' => $request->sexo,
-            'cpf' => $this->onlyDigits($request->cpf),
-            'telefone' => $this->onlyDigits($request->telefone),
+            'cpf' => $request->cpf,
+            'telefone' => $request->telefone,
             'observacoes' => $request->observacoes,
         ];
 
@@ -222,10 +227,11 @@ class IdosoController extends Controller
     public function gerenciar()
     {
         $user = auth()->user();
+        abort_unless($user, 401);
 
         $idosos = \App\Models\Idoso::with('users')->get();
 
-        if ($user && $user->is_admin) {
+        if ($user->is_admin) {
             $idosos = $idosos->sortByDesc(function ($idoso) use ($user) {
                 return $idoso->users->contains('id', $user->id) ? 1 : 0;
             })->values();
@@ -315,16 +321,21 @@ class IdosoController extends Controller
     {
         $this->ensureVinculo($idoso);
 
+        $request->merge([
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
+        ]);
+
         $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'data_nascimento' => ['required', 'date'],
             'sexo' => ['nullable', 'string', 'max:20'],
             'cpf' => [
                 'required',
-                'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/',
+                'digits:11',
                 Rule::unique('idosos', 'cpf')->ignore($idoso->id),
             ],
-            'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'telefone' => ['nullable', 'digits_between:10,11'],
             'observacoes' => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -332,8 +343,8 @@ class IdosoController extends Controller
             'nome' => $request->nome,
             'data_nascimento' => $request->data_nascimento,
             'sexo' => $request->sexo,
-            'cpf' => $this->onlyDigits($request->cpf),
-            'telefone' => $this->onlyDigits($request->telefone),
+            'cpf' => $request->cpf,
+            'telefone' => $request->telefone,
             'observacoes' => $request->observacoes,
         ]);
 
@@ -430,16 +441,21 @@ class IdosoController extends Controller
     {
         $this->ensureVinculo($idoso);
 
+        $request->merge([
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
+        ]);
+
         $request->validate([
             'nome' => ['required', 'string', 'max:255'],
             'data_nascimento' => ['required', 'date'],
             'sexo' => ['nullable', 'string', 'max:20'],
             'cpf' => [
                 'required',
-                'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/',
+                'digits:11',
                 Rule::unique('idosos', 'cpf')->ignore($idoso->id),
             ],
-            'telefone' => ['nullable', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'telefone' => ['nullable', 'digits_between:10,11'],
             'observacoes' => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -447,8 +463,8 @@ class IdosoController extends Controller
             'nome' => $request->nome,
             'data_nascimento' => $request->data_nascimento,
             'sexo' => $request->sexo,
-            'cpf' => $this->onlyDigits($request->cpf),
-            'telefone' => $this->onlyDigits($request->telefone),
+            'cpf' => $request->cpf,
+            'telefone' => $request->telefone,
             'observacoes' => $request->observacoes,
         ]);
 

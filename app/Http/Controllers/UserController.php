@@ -34,13 +34,20 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
+            'cep' => $this->onlyDigits($request->cep),
+            'estado' => $request->estado ? strtoupper($request->estado) : null,
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'sobrenome' => ['nullable', 'string', 'max:255'],
-            'cpf' => ['required', 'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/', 'unique:users,cpf'],
-            'telefone' => ['required', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'cpf' => ['required', 'digits:11', 'unique:users,cpf'],
+            'telefone' => ['required', 'digits_between:10,11'],
             'data_nascimento' => ['nullable', 'date'],
-            'cep' => ['nullable', 'regex:/^\d{5}\-\d{3}$/'],
+            'cep' => ['nullable', 'digits:8'],
             'logradouro' => ['nullable', 'string', 'max:255'],
             'numero' => ['nullable', 'string', 'max:20'],
             'bairro' => ['nullable', 'string', 'max:255'],
@@ -51,10 +58,6 @@ class UserController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
-        $validated['cpf'] = $this->onlyDigits($validated['cpf']);
-        $validated['telefone'] = $this->onlyDigits($validated['telefone']);
-        $validated['cep'] = $this->onlyDigits($validated['cep'] ?? null);
-        $validated['estado'] = isset($validated['estado']) ? strtoupper($validated['estado']) : null;
         $validated['password'] = Hash::make($validated['password']);
 
         User::create($validated);
@@ -75,17 +78,24 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $request->merge([
+            'cpf' => $this->onlyDigits($request->cpf),
+            'telefone' => $this->onlyDigits($request->telefone),
+            'cep' => $this->onlyDigits($request->cep),
+            'estado' => $request->estado ? strtoupper($request->estado) : null,
+        ]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'sobrenome' => ['nullable', 'string', 'max:255'],
             'cpf' => [
                 'required',
-                'regex:/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/',
+                'digits:11',
                 Rule::unique('users', 'cpf')->ignore($user->id),
             ],
-            'telefone' => ['required', 'regex:/^\(\d{2}\)\s\d{4,5}\-\d{4}$/'],
+            'telefone' => ['required', 'digits_between:10,11'],
             'data_nascimento' => ['nullable', 'date'],
-            'cep' => ['nullable', 'regex:/^\d{5}\-\d{3}$/'],
+            'cep' => ['nullable', 'digits:8'],
             'logradouro' => ['nullable', 'string', 'max:255'],
             'numero' => ['nullable', 'string', 'max:20'],
             'bairro' => ['nullable', 'string', 'max:255'],
@@ -94,11 +104,6 @@ class UserController extends Controller
             'complemento' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
         ]);
-
-        $validated['cpf'] = $this->onlyDigits($validated['cpf']);
-        $validated['telefone'] = $this->onlyDigits($validated['telefone']);
-        $validated['cep'] = $this->onlyDigits($validated['cep'] ?? null);
-        $validated['estado'] = isset($validated['estado']) ? strtoupper($validated['estado']) : null;
 
         $user->update($validated);
 

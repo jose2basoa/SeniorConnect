@@ -5,211 +5,212 @@
 
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
-            <h3 class="fw-bold mb-1">Contatos</h3>
+            <h3 class="fw-bold mb-1">Novo evento</h3>
             <small class="text-muted">
                 Referente a: <span class="fw-semibold">{{ $idoso->nome }}</span>
             </small>
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{{ route('dashboard', ['idoso' => $idoso->id]) }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Voltar ao painel
+            <a href="{{ route('eventos.index', $idoso->id) }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Voltar aos eventos
             </a>
-            <a href="{{ route('idosos.show', $idoso->id) }}" class="btn btn-primary">
-                <i class="bi bi-person-badge me-1"></i> Ver perfil
+
+            <a href="{{ route('dashboard', ['idoso' => $idoso->id]) }}" class="btn btn-primary">
+                <i class="bi bi-speedometer2 me-1"></i> Ir ao painel
             </a>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body p-4 text-center">
-                    <div class="fs-2 text-primary mb-2">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <div class="text-muted small">Tutores vinculados</div>
-                    <div class="fw-bold fs-3">{{ $tutores->count() }}</div>
-                    <small class="text-muted">Pessoas com acesso ao acompanhamento</small>
-                </div>
+    @if ($errors->any())
+        <div class="alert alert-danger border-0 shadow-sm rounded-4">
+            <div class="fw-semibold mb-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Não foi possível cadastrar o evento
             </div>
+            <ul class="mb-0 ps-3">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body p-4 text-center">
-                    <div class="fs-2 text-danger mb-2">
-                        <i class="bi bi-exclamation-triangle"></i>
-                    </div>
-                    <div class="text-muted small">Contatos de emergência</div>
-                    <div class="fw-bold fs-3">{{ $contatosEmergencia->count() }}</div>
-                    <small class="text-muted">Rede de apoio para situações urgentes</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-body p-4 text-center">
-                    <div class="fs-2 text-success mb-2">
-                        <i class="bi bi-shield-check"></i>
-                    </div>
-                    <div class="text-muted small">Contato principal</div>
-                    <div class="fw-bold">
-                        {{ optional($contatosEmergencia->sortBy('prioridade')->first())->nome ?? 'Não definido' }}
-                    </div>
-                    <small class="text-muted">Primeira referência em caso de emergência</small>
-                </div>
-            </div>
-        </div>
-    </div>
+    @endif
 
     <div class="row g-4">
-
-        {{-- TUTORES --}}
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-header bg-primary text-white rounded-top-4 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">
-                        <i class="bi bi-people me-1"></i> Tutores vinculados
-                    </span>
-                    <span class="badge bg-light text-primary">
-                        {{ $tutores->count() }}
-                    </span>
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-journal-medical me-2 text-primary"></i>
+                        Cadastro de evento
+                    </h5>
+                    <small class="text-muted">
+                        Registre ocorrências importantes para acompanhamento do idoso.
+                    </small>
                 </div>
 
-                <div class="card-body">
-                    @if($tutores->isEmpty())
-                        <div class="text-center py-4">
-                            <div class="fs-3 mb-2">👥</div>
-                            <div class="fw-semibold mb-1">Nenhum tutor encontrado</div>
-                            <div class="text-muted small">
-                                Ainda não há pessoas vinculadas como tutores deste cadastro.
+                <div class="card-body p-4">
+                    <form action="{{ route('eventos.store', $idoso->id) }}" method="POST" class="row g-3">
+                        @csrf
+
+                        <div class="col-md-6">
+                            <label for="tipo" class="form-label fw-semibold">Tipo do evento</label>
+                            <select
+                                name="tipo"
+                                id="tipo"
+                                class="form-select @error('tipo') is-invalid @enderror"
+                                required
+                            >
+                                <option value="">Selecione</option>
+                                <option value="queda" {{ old('tipo') === 'queda' ? 'selected' : '' }}>Queda</option>
+                                <option value="medicacao" {{ old('tipo') === 'medicacao' ? 'selected' : '' }}>Medicação</option>
+                                <option value="sintoma" {{ old('tipo') === 'sintoma' ? 'selected' : '' }}>Sintoma</option>
+                                <option value="rotina" {{ old('tipo') === 'rotina' ? 'selected' : '' }}>Rotina</option>
+                                <option value="consulta" {{ old('tipo') === 'consulta' ? 'selected' : '' }}>Consulta</option>
+                                <option value="comportamento" {{ old('tipo') === 'comportamento' ? 'selected' : '' }}>Comportamento</option>
+                                <option value="outro" {{ old('tipo') === 'outro' ? 'selected' : '' }}>Outro</option>
+                            </select>
+                            @error('tipo')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="nivel" class="form-label fw-semibold">Nível de atenção</label>
+                            <select
+                                name="nivel"
+                                id="nivel"
+                                class="form-select @error('nivel') is-invalid @enderror"
+                                required
+                            >
+                                <option value="">Selecione</option>
+                                <option value="baixo" {{ old('nivel') === 'baixo' ? 'selected' : '' }}>Baixo</option>
+                                <option value="medio" {{ old('nivel') === 'medio' ? 'selected' : '' }}>Médio</option>
+                                <option value="alto" {{ old('nivel') === 'alto' ? 'selected' : '' }}>Alto</option>
+                                <option value="critico" {{ old('nivel') === 'critico' ? 'selected' : '' }}>Crítico</option>
+                            </select>
+                            @error('nivel')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="origem" class="form-label fw-semibold">Origem</label>
+                            <select
+                                name="origem"
+                                id="origem"
+                                class="form-select @error('origem') is-invalid @enderror"
+                            >
+                                <option value="">Manual (padrão)</option>
+                                <option value="manual" {{ old('origem') === 'manual' ? 'selected' : '' }}>Manual</option>
+                                <option value="sistema" {{ old('origem') === 'sistema' ? 'selected' : '' }}>Sistema</option>
+                                <option value="app" {{ old('origem') === 'app' ? 'selected' : '' }}>Aplicativo</option>
+                            </select>
+                            @error('origem')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="data_evento" class="form-label fw-semibold">Data e hora do evento</label>
+                            <input
+                                type="datetime-local"
+                                name="data_evento"
+                                id="data_evento"
+                                class="form-control @error('data_evento') is-invalid @enderror"
+                                value="{{ old('data_evento', now()->format('Y-m-d\TH:i')) }}"
+                            >
+                            @error('data_evento')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12">
+                            <label for="descricao" class="form-label fw-semibold">Descrição</label>
+                            <textarea
+                                name="descricao"
+                                id="descricao"
+                                rows="5"
+                                class="form-control @error('descricao') is-invalid @enderror"
+                                placeholder="Descreva o ocorrido com clareza..."
+                                required
+                            >{{ old('descricao') }}</textarea>
+                            @error('descricao')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="resolvido"
+                                    name="resolvido"
+                                    value="1"
+                                    {{ old('resolvido') ? 'checked' : '' }}
+                                >
+                                <label class="form-check-label fw-semibold" for="resolvido">
+                                    Marcar como resolvido
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                                Ative esta opção caso o evento já tenha sido tratado no momento do cadastro.
+                            </small>
+                        </div>
+
+                        <div class="col-12 pt-2">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-circle me-1"></i> Salvar evento
+                                </button>
+
+                                <a href="{{ route('eventos.index', $idoso->id) }}" class="btn btn-outline-secondary">
+                                    Cancelar
+                                </a>
                             </div>
                         </div>
-                    @else
-                        <div class="d-flex flex-column gap-3">
-                            @foreach($tutores as $tutor)
-                                @php
-                                    $tel = $tutor->telefone ?? null;
-                                    $telLimpo = $tel ? preg_replace('/\D/', '', $tel) : null;
-                                @endphp
-
-                                <div class="border rounded-4 p-3">
-                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                                        <div>
-                                            <div class="fw-bold">{{ $tutor->nome_completo ?? $tutor->name }}</div>
-
-                                            @if(!empty($tutor->email))
-                                                <div class="text-muted small">
-                                                    <i class="bi bi-envelope me-1"></i>{{ $tutor->email }}
-                                                </div>
-                                            @endif
-
-                                            <div class="text-muted small mt-1">
-                                                <i class="bi bi-telephone me-1"></i>
-                                                {{ $tel ?? 'Sem telefone cadastrado' }}
-                                            </div>
-                                        </div>
-
-                                        <div class="d-flex gap-2">
-                                            <a class="btn btn-sm btn-outline-primary {{ $tel ? '' : 'disabled' }}"
-                                               href="{{ $tel ? 'tel:'.$tel : '#' }}">
-                                                <i class="bi bi-telephone me-1"></i>Ligar
-                                            </a>
-
-                                            <a class="btn btn-sm btn-outline-success {{ $telLimpo ? '' : 'disabled' }}"
-                                               target="_blank"
-                                               href="{{ $telLimpo ? 'https://wa.me/55'.$telLimpo : '#' }}">
-                                                <i class="bi bi-whatsapp me-1"></i>WhatsApp
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
+                    </form>
                 </div>
             </div>
         </div>
 
-        {{-- CONTATOS DE EMERGÊNCIA --}}
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-header bg-danger text-white rounded-top-4 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">
-                        <i class="bi bi-exclamation-triangle me-1"></i> Contatos de emergência
-                    </span>
-                    <span class="badge bg-light text-danger">
-                        {{ $contatosEmergencia->count() }}
-                    </span>
-                </div>
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>
+                        Resumo do cadastro
+                    </h5>
 
-                <div class="card-body">
-                    @if($contatosEmergencia->isEmpty())
-                        <div class="text-center py-4">
-                            <div class="fs-3 mb-2">🚨</div>
-                            <div class="fw-semibold mb-1">Nenhum contato de emergência cadastrado</div>
-                            <div class="text-muted small">
-                                Cadastre pelo menos um contato para fortalecer a rede de apoio.
-                            </div>
+                    <div class="border rounded-4 p-3 mb-3 bg-light-subtle">
+                        <div class="small text-muted">Pessoa acompanhada</div>
+                        <div class="fw-semibold">{{ $idoso->nome }}</div>
+                    </div>
+
+                    <div class="border rounded-4 p-3 mb-3">
+                        <div class="small text-muted">Tipos aceitos</div>
+                        <div class="mt-2 d-flex flex-wrap gap-2">
+                            <span class="badge text-bg-light border">Queda</span>
+                            <span class="badge text-bg-light border">Medicação</span>
+                            <span class="badge text-bg-light border">Sintoma</span>
+                            <span class="badge text-bg-light border">Rotina</span>
+                            <span class="badge text-bg-light border">Consulta</span>
+                            <span class="badge text-bg-light border">Comportamento</span>
+                            <span class="badge text-bg-light border">Outro</span>
                         </div>
-                    @else
-                        <div class="d-flex flex-column gap-3">
-                            @foreach($contatosEmergencia->sortBy('prioridade') as $c)
-                                @php
-                                    $tel = $c->telefone ?? null;
-                                    $telLimpo = $tel ? preg_replace('/\D/', '', $tel) : null;
-                                    $principal = ($c->prioridade ?? 1) == 1;
-                                @endphp
+                    </div>
 
-                                <div class="border rounded-4 p-3 {{ $principal ? 'border-danger-subtle bg-danger-subtle' : '' }}">
-                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                                        <div>
-                                            <div class="fw-bold d-flex align-items-center flex-wrap gap-2">
-                                                {{ $c->nome }}
-
-                                                @if($principal)
-                                                    <span class="badge bg-danger">Principal</span>
-                                                @else
-                                                    <span class="badge bg-light text-dark border">
-                                                        Prioridade {{ $c->prioridade }}
-                                                    </span>
-                                                @endif
-                                            </div>
-
-                                            <div class="text-muted small mt-1">
-                                                <i class="bi bi-people me-1"></i>
-                                                {{ $c->parentesco ?: 'Parentesco não informado' }}
-                                            </div>
-
-                                            <div class="text-muted small mt-1">
-                                                <i class="bi bi-telephone me-1"></i>
-                                                {{ $tel ?? 'Sem telefone cadastrado' }}
-                                            </div>
-                                        </div>
-
-                                        <div class="d-flex gap-2">
-                                            <a class="btn btn-sm btn-outline-danger {{ $tel ? '' : 'disabled' }}"
-                                               href="{{ $tel ? 'tel:'.$tel : '#' }}">
-                                                <i class="bi bi-telephone me-1"></i>Ligar
-                                            </a>
-
-                                            <a class="btn btn-sm btn-outline-success {{ $telLimpo ? '' : 'disabled' }}"
-                                               target="_blank"
-                                               href="{{ $telLimpo ? 'https://wa.me/55'.$telLimpo : '#' }}">
-                                                <i class="bi bi-whatsapp me-1"></i>WhatsApp
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
+                    <div class="border rounded-4 p-3">
+                        <div class="small text-muted mb-2">Orientação</div>
+                        <small class="text-muted">
+                            Registre eventos relevantes com descrição objetiva, pois eles compõem o histórico de acompanhamento do idoso.
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 
 </div>

@@ -7,46 +7,142 @@
     $horaAgora = \Carbon\Carbon::now()->format('H:i');
 @endphp
 
-<div class="container py-4 py-md-5">
+<style>
+    .dashboard-page {
+        padding-bottom: 2rem;
+    }
 
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
-        <div>
-            <h3 class="mb-1 fw-bold">Painel de Monitoramento</h3>
+    .dashboard-hero-title {
+        font-size: clamp(1.75rem, 2vw, 2.4rem);
+        line-height: 1.15;
+    }
 
-            <div class="text-muted small small-md-base">
+    .dashboard-card,
+    .dashboard-summary-card,
+    .dashboard-person-card {
+        border: 0;
+        border-radius: 1.25rem;
+        box-shadow: 0 .125rem .75rem rgba(15, 23, 42, .08);
+    }
+
+    .dashboard-summary-card .card-body {
+        min-height: 220px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .dashboard-panel-header {
+        border: 0;
+        border-radius: 1.25rem 1.25rem 0 0 !important;
+        padding: 1rem 1.25rem;
+    }
+
+    .dashboard-collapse-label {
+        white-space: nowrap;
+    }
+
+    .dashboard-floating-idosos {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1030;
+        background: rgba(255,255,255,.97);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0,0,0,.08);
+        box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+    }
+
+    .dashboard-person-card {
+        width: 240px;
+        min-width: 240px;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .dashboard-person-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .4rem 1rem rgba(15, 23, 42, .12);
+    }
+
+    .dashboard-person-avatar {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+    }
+
+    .dashboard-bottom-spacer {
+        height: 130px;
+    }
+
+    @media (max-width: 991.98px) {
+        .dashboard-floating-idosos {
+            position: static;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(0,0,0,.08);
+            border-radius: 1.25rem;
+            box-shadow: 0 .125rem .75rem rgba(15, 23, 42, .08);
+            backdrop-filter: none;
+        }
+
+        .dashboard-bottom-spacer {
+            display: none;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .dashboard-summary-card .card-body {
+            min-height: auto;
+        }
+
+        .dashboard-collapse-label {
+            white-space: normal;
+        }
+    }
+</style>
+
+<div class="container py-4 py-lg-5 dashboard-page">
+
+    <div class="row align-items-center g-3 g-lg-4 mb-4 mb-lg-5">
+        <div class="col-12 col-xl">
+            <h1 class="dashboard-hero-title fw-bold mb-2">Painel de<br class="d-none d-md-block"> Monitoramento</h1>
+
+            <div class="text-muted small mb-1">
                 <i class="bi bi-calendar3 me-1"></i> {{ $hoje }}
                 <span class="mx-2">•</span>
                 <i class="bi bi-clock me-1"></i> {{ $horaAgora }}
             </div>
 
             @auth
-                <small class="text-muted d-block mt-1">
+                <div class="text-muted">
                     Olá, <span class="fw-semibold">{{ auth()->user()->name }}</span> 👋
-                </small>
+                </div>
             @endauth
         </div>
 
-        <div class="d-grid d-sm-flex align-items-stretch align-items-sm-center gap-2 w-100 w-lg-auto">
-            @if($idoso)
-                <span class="badge {{ $alertas > 0 ? 'bg-danger' : 'bg-success' }} fs-6 px-3 py-2 text-center">
-                    <i class="bi {{ $alertas > 0 ? 'bi-exclamation-triangle' : 'bi-check-circle' }} me-1"></i>
-                    {{ $alertas > 0 ? "$alertas alertas ativos" : 'Sem alertas' }}
-                </span>
+        <div class="col-12 col-xl-auto">
+            <div class="d-grid d-md-flex gap-2 justify-content-xl-end">
+                @if($idoso)
+                    <span class="badge {{ $alertas > 0 ? 'bg-danger' : 'bg-success' }} fs-6 px-3 py-2 d-inline-flex align-items-center justify-content-center">
+                        <i class="bi {{ $alertas > 0 ? 'bi-exclamation-triangle' : 'bi-check-circle' }} me-2"></i>
+                        {{ $alertas > 0 ? "$alertas alertas ativos" : 'Sem alertas' }}
+                    </span>
 
-                <a href="{{ route('idosos.gerenciar') }}" class="btn btn-primary">
-                    <i class="bi bi-people me-1"></i> Gerenciar acompanhados
-                </a>
-            @else
-                @if(auth()->user()->is_admin)
-                    <a href="{{ route('idosos.gerenciar') }}" class="btn btn-primary">
-                        <i class="bi bi-people me-1"></i> Gerenciar idosos
+                    <a href="{{ route('idosos.gerenciar') }}" class="btn btn-primary px-3">
+                        <i class="bi bi-people me-1"></i> Gerenciar acompanhados
                     </a>
                 @else
-                    <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i> Cadastrar pessoa acompanhada
-                    </a>
+                    @if(auth()->user()->is_admin)
+                        <a href="{{ route('idosos.gerenciar') }}" class="btn btn-primary px-3">
+                            <i class="bi bi-people me-1"></i> Gerenciar idosos
+                        </a>
+                    @else
+                        <a href="{{ route('idosos.cadastrar') }}" class="btn btn-primary px-3">
+                            <i class="bi bi-plus-circle me-1"></i> Cadastrar pessoa acompanhada
+                        </a>
+                    @endif
                 @endif
-            @endif
+            </div>
         </div>
     </div>
 
@@ -58,40 +154,40 @@
             $statusIcon = $idoso->status_online ? 'bi-wifi' : 'bi-wifi-off';
         @endphp
 
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-body p-3 p-md-4 d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
-                <div class="w-100">
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                        <h4 class="fw-bold mb-0">{{ $idoso->nome }}</h4>
+        <div class="card dashboard-card mb-4">
+            <div class="card-body p-3 p-lg-4">
+                <div class="row align-items-center g-3">
+                    <div class="col-12 col-lg">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <h2 class="h3 fw-bold mb-0">{{ $idoso->nome }}</h2>
 
-                        @if(!is_null($idade))
-                            <span class="badge bg-light text-dark border">
-                                {{ $idade }} anos
+                            @if(!is_null($idade))
+                                <span class="badge bg-light text-dark border">{{ $idade }} anos</span>
+                            @endif
+
+                            <span class="badge bg-light text-dark border d-inline-flex align-items-center">
+                                <i class="bi {{ $statusIcon }} me-1 {{ $statusClass }}"></i>
+                                <span class="{{ $statusClass }} fw-semibold">{{ $statusLabel }}</span>
                             </span>
-                        @endif
+                        </div>
 
-                        <span class="badge bg-light text-dark border">
-                            <i class="bi {{ $statusIcon }} me-1 {{ $statusClass }}"></i>
-                            <span class="{{ $statusClass }} fw-semibold">{{ $statusLabel }}</span>
-                        </span>
+                        <div class="text-muted">
+                            @if($idoso->ultima_atividade)
+                                Última atividade às
+                            <span class="fw-semibold">{{ \Carbon\Carbon::parse($idoso->ultima_atividade)->format('H:i') }}</span>
+                            @else
+                                Sem registro de atividade recente
+                            @endif
+                        </div>
                     </div>
 
-                    <small class="text-muted d-block">
-                        @if($idoso->ultima_atividade)
-                            Última atividade às
-                            <span class="fw-semibold">
-                                {{ \Carbon\Carbon::parse($idoso->ultima_atividade)->format('H:i') }}
-                            </span>
-                        @else
-                            Sem registro de atividade recente
-                        @endif
-                    </small>
-                </div>
-
-                <div class="w-100 w-lg-auto d-grid d-sm-flex gap-2">
-                    <a href="{{ route('idosos.show', $idoso->id) }}" class="btn btn-outline-primary">
-                        <i class="bi bi-person-badge me-1"></i> Dados pessoais
-                    </a>
+                    <div class="col-12 col-lg-auto">
+                        <div class="d-grid d-sm-flex gap-2 justify-content-lg-end">
+                            <a href="{{ route('idosos.show', $idoso->id) }}" class="btn btn-outline-primary px-3">
+                                <i class="bi bi-person-badge me-1"></i> Dados pessoais
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -99,7 +195,7 @@
 
     @if(!$idoso)
 
-        <div class="card shadow-sm border-0 rounded-4">
+        <div class="card dashboard-card">
             <div class="card-body p-4 p-md-5 text-center">
                 <div class="display-6 mb-2">👵📱</div>
                 <h4 class="fw-bold mb-2">Vamos começar?</h4>
@@ -143,57 +239,46 @@
 
     @else
 
-        <div class="row g-3 g-md-4 mb-4">
+        <div class="row g-3 g-lg-4 mb-4">
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="card dashboard-summary-card h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 {{ $idoso->status_online ? 'text-success' : 'text-danger' }}">
                             <i class="bi {{ $idoso->status_online ? 'bi-wifi' : 'bi-wifi-off' }}"></i>
                         </div>
                         <div class="text-muted small">Status</div>
-                        <div class="fw-bold fs-5 {{ $idoso->status_online ? 'text-success' : 'text-danger' }}">
-                            {{ $idoso->status_online ? 'Online' : 'Offline' }}
-                        </div>
+                        <div class="fw-bold fs-4 {{ $idoso->status_online ? 'text-success' : 'text-danger' }}">{{ $idoso->status_online ? 'Online' : 'Offline' }}</div>
                         <small class="text-muted d-block mt-2">
                             Última atividade:
-                            <span class="fw-semibold">
-                                {{ $idoso->ultima_atividade ? \Carbon\Carbon::parse($idoso->ultima_atividade)->format('H:i') : 'Sem registro' }}
-                            </span>
+                            <span class="fw-semibold">{{ $idoso->ultima_atividade ? \Carbon\Carbon::parse($idoso->ultima_atividade)->format('H:i') : 'Sem registro' }}</span>
                         </small>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="card dashboard-summary-card h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 {{ $alertas > 0 ? 'text-danger' : 'text-success' }}">
                             <i class="bi bi-exclamation-triangle"></i>
                         </div>
                         <div class="text-muted small">Alertas ativos</div>
-                        <div class="fw-bold fs-3 {{ $alertas > 0 ? 'text-danger' : 'text-success' }}">
-                            {{ $alertas }}
-                        </div>
-                        <small class="text-muted d-block">
-                            {{ $alertas > 0 ? 'Requer atenção' : 'Tudo certo no momento' }}
-                        </small>
+                        <div class="fw-bold fs-2 {{ $alertas > 0 ? 'text-danger' : 'text-success' }}">{{ $alertas }}</div>
+                        <small class="text-muted d-block">{{ $alertas > 0 ? 'Requer atenção' : 'Tudo certo no momento' }}</small>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="card dashboard-summary-card h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 text-primary">
                             <i class="bi bi-geo-alt"></i>
                         </div>
 
                         <div class="text-muted small">Última localização</div>
-
-                        <div class="fw-semibold">
-                            {{ $ultimaLocalizacao->endereco ?? 'Sem localização registrada' }}
-                        </div>
+                        <div class="fw-semibold">{{ $ultimaLocalizacao->endereco ?? 'Sem localização registrada' }}</div>
 
                         <small class="text-muted d-block mt-2">
                             @if($ultimaLocalizacao?->capturado_em)
@@ -210,9 +295,7 @@
 
                         <div class="mt-3 d-grid">
                             @if($latitude && $longitude)
-                                <a class="btn btn-outline-primary btn-sm"
-                                   target="_blank"
-                                   href="https://www.google.com/maps?q={{ $latitude }},{{ $longitude }}">
+                                <a class="btn btn-outline-primary btn-sm" target="_blank" href="https://www.google.com/maps?q={{ $latitude }},{{ $longitude }}">
                                     <i class="bi bi-map me-1"></i> Ver no mapa
                                 </a>
                             @else
@@ -225,8 +308,8 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="col-12 col-md-6 col-xxl-3">
+                <div class="card dashboard-summary-card h-100">
                     <div class="card-body p-4 text-center">
                         <div class="fs-2 mb-2 text-warning">
                             <i class="bi bi-capsule"></i>
@@ -236,9 +319,7 @@
                             {{ $proximoMedicamento && !$proximoMedicamento->tomado ? 'Próximo medicamento' : 'Medicamento atual' }}
                         </div>
 
-                        <div class="fw-semibold mt-1">
-                            {{ $proximoMedicamento->nome ?? 'Nenhum cadastrado' }}
-                        </div>
+                        <div class="fw-semibold mt-1">{{ $proximoMedicamento->nome ?? 'Nenhum cadastrado' }}</div>
 
                         <small class="text-muted d-block mt-2">
                             @if($proximoMedicamento && $proximoMedicamento->horario)
@@ -287,14 +368,13 @@
 
         </div>
 
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
-
+        <div class="card dashboard-card mb-4">
             @php
                 $alertasAtivos = $alertas ?? 0;
                 $alertasCriticos = $ultimosEventos->where('nivel', 'critico')->count();
             @endphp
 
-            <div class="card-header bg-primary text-white rounded-top-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2"
+            <div class="card-header dashboard-panel-header bg-primary text-white d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2"
                  data-bs-toggle="collapse"
                  data-bs-target="#eventosCollapse"
                  aria-expanded="false"
@@ -307,9 +387,7 @@
                         Últimos eventos
 
                         @if($alertasAtivos > 0)
-                            <span class="badge bg-light text-primary fw-bold rounded-pill px-2 py-1">
-                                {{ $alertasAtivos }}
-                            </span>
+                            <span class="badge bg-light text-primary fw-bold rounded-pill px-2 py-1">{{ $alertasAtivos }}</span>
                         @endif
 
                         @if($alertasCriticos > 0)
@@ -320,17 +398,13 @@
                     </span>
 
                     @if($alertasAtivos > 0)
-                        <small class="text-white-50">
-                            {{ $alertasAtivos }} alerta{{ $alertasAtivos > 1 ? 's' : '' }} ativo{{ $alertasAtivos > 1 ? 's' : '' }}
-                        </small>
+                        <small class="text-white-50">{{ $alertasAtivos }} alerta{{ $alertasAtivos > 1 ? 's' : '' }} ativo{{ $alertasAtivos > 1 ? 's' : '' }}</small>
                     @else
-                        <small class="text-white-50">
-                            Sem alertas ativos no momento
-                        </small>
+                        <small class="text-white-50">Sem alertas ativos no momento</small>
                     @endif
                 </div>
 
-                <small class="opacity-75 d-flex align-items-center">
+                <small class="opacity-75 d-flex align-items-center dashboard-collapse-label">
                     Registros recentes
                     <i class="bi bi-chevron-down ms-2 collapse-arrow"></i>
                 </small>
@@ -338,11 +412,8 @@
 
             <div id="eventosCollapse" class="collapse">
                 <div class="card-body p-3 p-md-4">
-
                     @if($ultimosEventos->isEmpty())
-                        <div class="text-muted">
-                            Nenhum evento registrado até o momento.
-                        </div>
+                        <div class="text-muted">Nenhum evento registrado até o momento.</div>
                     @else
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
@@ -390,17 +461,10 @@
                                                 <i class="bi {{ $icone }} me-1"></i>
                                                 {{ ucfirst($evento->tipo) }}
                                             </td>
-
-                                            <td class="text-muted">
-                                                {{ $evento->descricao }}
-                                            </td>
-
+                                            <td class="text-muted">{{ $evento->descricao }}</td>
                                             <td class="d-none d-md-table-cell">
-                                                <span class="badge {{ $badge }}">
-                                                    {{ ucfirst($nivel) }}
-                                                </span>
+                                                <span class="badge {{ $badge }}">{{ ucfirst($nivel) }}</span>
                                             </td>
-
                                             <td class="text-end text-muted text-nowrap">
                                                 {{ $evento->data_evento ? \Carbon\Carbon::parse($evento->data_evento)->format('H:i') : $evento->created_at->format('H:i') }}
                                             </td>
@@ -411,19 +475,17 @@
                         </div>
 
                         <div class="mt-3 d-grid d-md-flex justify-content-md-end">
-                            <a href="{{ route('eventos.index', ['idoso' => $idoso->id]) }}"
-                               class="btn btn-outline-primary btn-sm">
+                            <a href="{{ route('eventos.index', ['idoso' => $idoso->id]) }}" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-list-ul me-1"></i> Ver histórico completo
                             </a>
                         </div>
                     @endif
-
                 </div>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-header bg-danger text-white rounded-top-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2"
+        <div class="card dashboard-card mb-4">
+            <div class="card-header dashboard-panel-header bg-danger text-white d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2"
                  data-bs-toggle="collapse"
                  data-bs-target="#acoesCollapse"
                  aria-expanded="false"
@@ -434,7 +496,7 @@
                     <i class="bi bi-lightning-charge me-1"></i> Ações rápidas
                 </span>
 
-                <small class="opacity-75 d-flex align-items-center">
+                <small class="opacity-75 d-flex align-items-center dashboard-collapse-label">
                     Atalhos do tutor
                     <i class="bi bi-chevron-down ms-2 collapse-arrow"></i>
                 </small>
@@ -443,64 +505,44 @@
             <div id="acoesCollapse" class="collapse">
                 <div class="card-body p-3 p-md-4">
                     <div class="row g-3 text-center">
-
                         <div class="col-12 col-sm-6 col-xl-3">
-                            <a href="{{ $idoso->telefone ? 'tel:'.$idoso->telefone : '#' }}"
-                               class="btn btn-primary w-100 {{ $idoso->telefone ? '' : 'disabled' }}">
+                            <a href="{{ $idoso->telefone ? 'tel:'.$idoso->telefone : '#' }}" class="btn btn-primary w-100 {{ $idoso->telefone ? '' : 'disabled' }}">
                                 <i class="bi bi-telephone me-1"></i> Ligar
                             </a>
                         </div>
 
                         <div class="col-12 col-sm-6 col-xl-3">
-                            <a href="{{ route('medicamentos.index', $idoso->id) }}"
-                               class="btn btn-outline-warning w-100">
+                            <a href="{{ route('medicamentos.index', $idoso->id) }}" class="btn btn-outline-warning w-100">
                                 <i class="bi bi-capsule me-1"></i> Medicamentos
                             </a>
                         </div>
 
                         <div class="col-12 col-sm-6 col-xl-3">
-                            <a href="{{ route('eventos.index', $idoso->id) }}"
-                               class="btn btn-outline-primary w-100">
+                            <a href="{{ route('eventos.index', $idoso->id) }}" class="btn btn-outline-primary w-100">
                                 <i class="bi bi-bell me-1"></i> Eventos
                             </a>
                         </div>
 
                         <div class="col-12 col-sm-6 col-xl-3">
-                            <a href="{{ route('contatos.index', $idoso->id) }}"
-                               class="btn btn-outline-secondary w-100">
+                            <a href="{{ route('contatos.index', $idoso->id) }}" class="btn btn-outline-secondary w-100">
                                 <i class="bi bi-telephone-forward me-1"></i> Contatos
                             </a>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
 
         @if(isset($idosos) && $idosos->count() > 1 && $idoso)
-
-            <div style="
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                z-index: 1050;
-                background: rgba(255,255,255,0.96);
-                backdrop-filter: blur(10px);
-                border-top: 1px solid rgba(0,0,0,0.08);
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-            ">
-
-                <div class="container py-2 py-md-3">
-
+            <div class="dashboard-floating-idosos">
+                <div class="container py-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="fw-bold mb-0 text-muted text-uppercase small">
                             <i class="bi bi-people me-2"></i>Pessoas acompanhadas
                         </h6>
                     </div>
 
-                    <div class="d-flex flex-nowrap gap-3 overflow-auto pb-2">
-
+                    <div class="d-flex flex-nowrap gap-3 overflow-auto pb-1">
                         @foreach($idosos as $pessoa)
                             @php
                                 $ativo = isset($idosoSelecionado) && $idosoSelecionado && $idosoSelecionado->id === $pessoa->id;
@@ -508,38 +550,26 @@
                             @endphp
 
                             <a href="{{ route('dashboard', ['idoso' => $pessoa->id]) }}"
-                            class="card border-0 shadow-sm text-decoration-none flex-shrink-0 rounded-4 {{ $ativo ? 'bg-primary text-white' : 'bg-white text-dark' }}"
-                            style="width: 240px; min-width: 240px;">
-
+                               class="card dashboard-person-card text-decoration-none flex-shrink-0 {{ $ativo ? 'bg-primary text-white' : 'bg-white text-dark' }}">
                                 <div class="card-body d-flex align-items-center gap-3 p-3">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden {{ $ativo ? 'bg-white text-primary' : 'bg-primary-subtle text-primary' }}"
-                                        style="width: 52px; height: 52px; min-width: 52px;">
-                                        <span class="fw-bold fs-5">
-                                            {{ strtoupper(mb_substr($pessoa->nome, 0, 1)) }}
-                                        </span>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden dashboard-person-avatar {{ $ativo ? 'bg-white text-primary' : 'bg-primary-subtle text-primary' }}">
+                                        <span class="fw-bold fs-5">{{ strtoupper(mb_substr($pessoa->nome, 0, 1)) }}</span>
                                     </div>
 
                                     <div class="flex-grow-1 overflow-hidden">
-                                        <div class="fw-bold text-truncate">
-                                            {{ $pessoa->nome }}
-                                        </div>
-
+                                        <div class="fw-bold text-truncate">{{ $pessoa->nome }}</div>
                                         <div class="small {{ $ativo ? 'text-white-50' : 'text-muted' }}">
                                             {{ $idadePessoa ? $idadePessoa . ' anos' : 'Idade não informada' }}
                                         </div>
                                     </div>
                                 </div>
                             </a>
-
                         @endforeach
-
                     </div>
                 </div>
             </div>
 
-            {{-- Espaço para não esconder conteúdo --}}
-            <div style="height: 130px;"></div>
-
+            <div class="dashboard-bottom-spacer"></div>
         @endif
 
     @endif
